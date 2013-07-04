@@ -7,7 +7,10 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\HttpFoundation\Response;
 use Zend;
-use Appshed\SpreadsheetBundle\Entity\Doc as Doc;
+use AppShed;
+use AppShed\Element\Screen as AppShedScreen;
+use AppShed\Element\Item as AppShedItem;
+use AppshedExtension\SpreadsheetBundle\Entity\Doc as Doc;
 
 /**
  * @Route("/spreadsheet/write")
@@ -25,7 +28,7 @@ class WriteController extends Controller {
     public function indexAction() {
         $request = $this->getRequest();
 
-        $secret = $request->get('secret');
+        $secret = $request->get('identifier');
 
         $em = $this->getDoctrine()->getManager();
         $doc = $em->getRepository('AppshedExtensionSpreadsheetBundle:Doc')->findOneBy(array('itemsecret' => $secret));
@@ -86,14 +89,28 @@ class WriteController extends Controller {
     public function documentAction() {
         $request = $this->getRequest();
 
-        $rowData = array(
-            'name' => 'lg',
-            'username' => 'google',
-            'password2' => 'index'
-        );
+        if ($request->isMethod('options')) {
+            header('Access-Control-Max-Age: 86400');
+            header('Access-Control-Allow-Origin: *');
+            header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+            header('Access-Control-Allow-Headers: accept, origin, x-requested-with, x-request');
+            exit;
+        }
 
+        $rowData = $this->getData($_REQUEST['fetchURL']);
 
-        $secret = $request->get('secret');
+        
+        unset($rowData['clientId']);
+        unset($rowData['clientSecret']);
+        unset($rowData['appId']);
+        unset($rowData['appSecret']);
+        unset($rowData['itemid']);
+        unset($rowData['identifier']);
+                 
+ 
+        $secret = $request->get('identifier');
+        $type = $request->get('type' , 'normal');
+
         $em = $this->getDoctrine()->getManager();
         $doc = $em->getRepository('AppshedExtensionSpreadsheetBundle:Doc')->findOneBy(array('itemsecret' => $secret));
         if (!is_null($doc)) {
@@ -103,6 +120,9 @@ class WriteController extends Controller {
 
             $store = false;
             foreach ($rowData as $titlename => $value) {
+                if(strlen($value)==''){
+                    unset($rowData[$titlename]);
+                }
                 if (!in_array($titlename, $existingTitles)) {
                     $store = true;
                     $this->addTitle($titlename, $adapter, $doc->getKey());
@@ -118,17 +138,32 @@ class WriteController extends Controller {
 
             if ($adapter instanceof \ZendGData\Spreadsheets) {
                 try {
-                    $entry = $adapter->insertRow($rowData, $doc->getKey(), 1);
-                    if ($entry instanceof Zend_Gdata_Spreadsheets_ListEntry) {
-                        return true;
+                    if(count($rowData)>0){
+                        $entry = $adapter->insertRow($rowData, $doc->getKey(), 1);
+                        if ($entry instanceof Zend_Gdata_Spreadsheets_ListEntry) {
+                            return true;
+                        }
                     }
                 } catch (Exception $exc) {
                     $this->errors[] = 'No write premissoin';
                 }
             }
         }
-        $lines = array();
-        return new Response(json_encode($lines));
+
+        $screen = new AppShedScreen\Screen('Saved');
+        $screen->addChild(new AppShedItem\HTML("Your record has been saved"));
+        $remote = new AppShed\HTML\Remote($screen);
+
+        if ($type == 'jsonp') {
+            $response = new Response($remote->getResponse(null, false, true));
+        } else {
+            $response = new Response($remote->getResponse(null, false, true));
+        }
+
+
+
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        return $response;
     }
 
     private function addTitle($name, $adapter, $key) {
@@ -194,6 +229,16 @@ class WriteController extends Controller {
         return isset($docurlparams['key']) ? $docurlparams['key'] : null;
     }
 
+    private function getData($url) {
+        $params = array();
+        $urloptios = parse_url($url);
+        if (isset($urloptios['query'])) {
+            parse_str($urloptios['query'], $params);
+            $docurlparams = $params;
+        }
+        return  $params;
+    }
+    
     private function googleLogin() {
         $service = \ZendGData\Spreadsheets::AUTH_SERVICE_NAME;
         $clientAdapter = new \Zend\Http\Client\Adapter\Curl();

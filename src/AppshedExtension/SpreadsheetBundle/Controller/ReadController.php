@@ -28,6 +28,11 @@ class ReadController extends Controller {
      * @Route("/test/")
      */
     public function testAction() {
+        
+        
+        phpinfo();
+        
+        
         $request = $this->getRequest();
 
         $secret = $request->get('identifier');
@@ -108,6 +113,9 @@ class ReadController extends Controller {
     private function getSpreadsheetAdapter() {
 
         $client = $this->googleLogin();
+        
+      
+        
         $adapter = new \ZendGData\Spreadsheets($client);
         return $adapter;
     }
@@ -166,6 +174,7 @@ class ReadController extends Controller {
                 }
             }
         }
+        
         $remote = new AppShed\HTML\Remote($screen);
         
         if($type=='jsonp'){
@@ -264,9 +273,19 @@ class ReadController extends Controller {
         $clientAdapter->setCurlOption(CURLOPT_SSL_VERIFYPEER, false);
         $httpClient = new \ZendGData\HttpClient();
         $httpClient->setAdapter($clientAdapter);
-        $client = \ZendGData\ClientLogin::getHttpClient("appshed.docs@gmail.com", "password", $service, $httpClient);
 
-
+        
+        try {
+          $client = \ZendGData\ClientLogin::getHttpClient("appshed.docs@gmail.com", "password", $service, $httpClient);
+        } catch (Zend_Gdata_App_CaptchaRequiredException $e) {
+          echo '<a href="' . $e->getCaptchaUrl() . '">CAPTCHA answer required to login</a>';
+        } catch (\ZendGData\Zend_Gdata_App_AuthException $e) {
+          echo 'Error: ' . $e->getMessage();
+          if ($e->getResponse() != null) {
+            echo 'Body: ' . $e->getResponse()->getBody();
+          }
+        }
+        
         return $client;
     }
 
