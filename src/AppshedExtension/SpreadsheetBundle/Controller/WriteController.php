@@ -21,13 +21,28 @@ class WriteController extends Controller {
             //'aroundme'
     );
 
+    private function getTitlesAction($key) {
+
+        $titles = array();
+
+        $worksheet = $this->getDocument($this->getSpreadsheetAdapter(), $key);
+        if ($worksheet != null) {
+
+            $lines = $worksheet->getContentsAsRows();
+            if (is_array($lines) && isset($lines['0']) && is_array($lines['0'])) {
+                $titles = array_keys($lines['0']);
+            }
+        }
+        return $titles;
+    }
+
     /**
      * @Route("/edit")
      * @Template()
      */
     public function indexAction() {
         $request = $this->getRequest();
-
+        $action = '';
         $secret = $request->get('identifier');
 
         $em = $this->getDoctrine()->getManager();
@@ -51,6 +66,7 @@ class WriteController extends Controller {
             $key = $this->getKey($url);
             $filters = $request->get('filters', array());
             $titles = array();
+            $action = $request->get('action', false);
 
             $worksheet = $this->getDocument($this->getSpreadsheetAdapter(), $key);
             if ($worksheet != null) {
@@ -62,7 +78,7 @@ class WriteController extends Controller {
 
                 $doc->setUrl($url);
                 $doc->setKey($key);
-                $doc->setTitles($titles);
+                $doc->setTitles(array_unique($titles));
                 $doc->setFilters(array_values($filters));
 
                 $em->persist($doc);
@@ -72,6 +88,7 @@ class WriteController extends Controller {
 
         return array(
             'doc' => $doc,
+            'action' => $action,
             'filterTypes' => $this->filterTypes
         );
     }
@@ -99,28 +116,28 @@ class WriteController extends Controller {
 
         $rowData = $this->getData($_REQUEST['fetchURL']);
 
-        
+
         unset($rowData['clientId']);
         unset($rowData['clientSecret']);
         unset($rowData['appId']);
         unset($rowData['appSecret']);
         unset($rowData['itemid']);
         unset($rowData['identifier']);
-                 
- 
+
+
         $secret = $request->get('identifier');
-        $type = $request->get('type' , 'normal');
+        $type = $request->get('type', 'normal');
 
         $em = $this->getDoctrine()->getManager();
         $doc = $em->getRepository('AppshedExtensionSpreadsheetBundle:Doc')->findOneBy(array('itemsecret' => $secret));
         if (!is_null($doc)) {
-
             $adapter = $this->getSpreadsheetAdapter();
-            $existingTitles = $doc->getTitles();
+       //     $existingTitles = $doc->getTitles();
+            $existingTitles = $this->getTitlesAction($doc->getKey());
 
             $store = false;
             foreach ($rowData as $titlename => $value) {
-                if(strlen($value)==''){
+                if (strlen($value) == '') {
                     unset($rowData[$titlename]);
                 }
                 if (!in_array($titlename, $existingTitles)) {
@@ -131,14 +148,14 @@ class WriteController extends Controller {
             }
 
             if ($store) {
-                $doc->setTitles($existingTitles);
+                $doc->setTitles(array_unique($existingTitles));
                 $em->persist($doc);
                 $em->flush();
             }
 
             if ($adapter instanceof \ZendGData\Spreadsheets) {
                 try {
-                    if(count($rowData)>0){
+                    if (count($rowData) > 0) {
                         $entry = $adapter->insertRow($rowData, $doc->getKey(), 1);
                         if ($entry instanceof Zend_Gdata_Spreadsheets_ListEntry) {
                             return true;
@@ -236,9 +253,9 @@ class WriteController extends Controller {
             parse_str($urloptios['query'], $params);
             $docurlparams = $params;
         }
-        return  $params;
+        return $params;
     }
-    
+
     private function googleLogin() {
         $service = \ZendGData\Spreadsheets::AUTH_SERVICE_NAME;
         $clientAdapter = new \Zend\Http\Client\Adapter\Curl();

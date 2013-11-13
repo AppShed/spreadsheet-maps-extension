@@ -21,7 +21,7 @@ class ReadController extends Controller {
     private $errors = array();
     
     private $filterTypes = array('<', '>', '=', '!=', '<=', '>=',
-            //'aroundme'
+            'aroundme'
     );
 
     /**
@@ -58,10 +58,9 @@ class ReadController extends Controller {
      * @Template()
      */
     public function indexAction() {
+        $action = '';
         $request = $this->getRequest();
-
         $secret = $request->get('identifier');
-
         $em = $this->getDoctrine()->getManager();
         $doc = $em->getRepository('AppshedExtensionSpreadsheetBundle:Doc')->findOneBy(array('itemsecret' => $secret));
 
@@ -77,11 +76,15 @@ class ReadController extends Controller {
             $doc->setDate(new \DateTime());
         }
 
+        
 
         if ($request->isMethod('post')) {
 
             $url = $request->get('url',false);
-                 $key = $this->getKey($url);
+            
+            $action = $request->get('action',false);
+            
+            $key = $this->getKey($url);
             if($url && $key){
                 
                 $filters = $request->get('filters', array());
@@ -104,8 +107,9 @@ class ReadController extends Controller {
         }
 
         return array(
-            'error'=> $this->getErrors(),
             'doc' => $doc,
+            'action'=>$action,
+            'error'=> $this->getErrors(),
             'filterTypes' => $this->filterTypes
         );
     }
@@ -291,18 +295,64 @@ class ReadController extends Controller {
 
     private function getAroundMeQuery($distance) {
         $this->aroundme = $distance;
-        $mapModel = AppBuilderHelper::getMapModel();
         $center = array(
-            'lat' => JRequest::getVar('userlat', null),
-            'lng' => JRequest::getVar('userlng', null)
+            'lat' => isset($_GET['userlat'])?$_GET['userlat']:0,
+            'lng' => isset($_GET['userlng'])?$_GET['userlng']:0
         );
-        $bounds = $mapModel->getBounds($center, $distance);
+        $bounds = $this->getBounds($center, $distance);
         $filters[] = 'lat > ' . $bounds['minLat'];
         $filters[] = 'lat < ' . $bounds['maxLat'];
         $filters[] = 'lng > ' . $bounds['minLng'];
         $filters[] = 'lng < ' . $bounds['maxLng'];
 
         return implode(' AND ', $filters);
+    }
+    public function distanceOrt($position, $point, $limit = false) {
+        $ra = M_PI / 180;
+        $b = $position['lat'] * $ra;
+        $c = $point['lat'] * $ra;
+        $f = (2 * asin(sqrt(pow(sin(($b - $c) / 2), 2) + cos($b) * cos($c) * pow(sin(($position['lng'] * $ra - $point['lng'] * $ra) / 2), 2)))) * 6378137;
+
+        if ($limit) {
+            return $f <= $limit;
+        } else {
+            return $f;
+        }
+    }
+
+    private function getConv($center) {
+        return array('lat' => $this->distanceOrt($center, array('lat' => ($center['lat'] + 0.1), 'lng' => ($center['lng']))) / 100, 'lng' => $this->distanceOrt($center, array('lat' => $center['lat'], 'lng' => ($center['lng'] + 0.1))) / 100);
+    }
+
+    public function pointPosion($conv, $center, $r, $angle) {
+        $r = $r / 1000;
+        return array('lat' => $center['lat'] + ($r / $conv['lat'] * cos($angle * M_PI / 180)), 'lng' => $center['lng'] + ($r / $conv['lng'] * sin($angle * M_PI / 180)), 'angle' => $angle);
+    }
+
+    public function getTextLength($d) {
+        if ($d > 1000) {
+            $d = $d / 1000;
+            return round($d, 2) . 'Km';
+        } else {
+            return round($d) . 'm';
+        }
+    }
+
+    public function getBounds($center, $radius) {
+        $conv = $this->getConv($center);
+        $bounces = array();
+
+        $top = $this->pointPosion($conv, $center, $radius, 0);
+        $right = $this->pointPosion($conv, $center, $radius, 90);
+        $bottom = $this->pointPosion($conv, $center, $radius, 180);
+        $left = $this->pointPosion($conv, $center, $radius, 270);
+        $bounces['minLng'] = $left['lng'];
+        //$bounces['centerLng']=$center['lng'];
+        $bounces['maxLng'] = $right['lng'];
+        $bounces['minLat'] = $bottom['lat'];
+        //$bounces['centerLat']=$center['lat'];
+        $bounces['maxLat'] = $top['lat'];
+        return $bounces;
     }
 
 }

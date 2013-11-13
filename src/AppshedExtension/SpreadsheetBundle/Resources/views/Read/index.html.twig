@@ -2,200 +2,231 @@
     <head style="background: transparent;">
         <script src="http://mootools.net/assets/scripts/mootools.core.js" type="text/javascript"></script>
         <script src="http://mootools.net/assets/scripts/mootools.more.js" type="text/javascript"></script>
-        
+
         <link href="http://twitter.github.io/bootstrap/assets/css/bootstrap.css" rel="stylesheet">
         <style>
 
-        html,
-        body{
-            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-            margin: 0px;
-            padding: 0px;
-            background-color: transparent;
-        }
+            html,
+            body{
+                font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                margin: 0px;
+                padding: 0px;
 
-        .gradient{
-            background: #CECECE;
-            background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJod…EiIGhlaWdodD0iMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+);
-            background: -moz-linear-gradient(top, rgba(206, 206, 206, 1) 0%, rgba(248, 248, 248, 1) 100%);
-            background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(206, 206, 206, 1)), color-stop(100%,rgba(248, 248, 248, 1)));
-            background: -webkit-linear-gradient(top, rgba(206, 206, 206, 1) 0%,rgba(248, 248, 248, 1) 100%);
-            background: -o-linear-gradient(top, rgba(206, 206, 206, 1) 0%,rgba(248, 248, 248, 1) 100%);
-            background: -ms-linear-gradient(top, rgba(206, 206, 206, 1) 0%,rgba(248, 248, 248, 1) 100%);
-            background: linear-gradient(top, rgba(206, 206, 206, 1) 0%,rgba(248, 248, 248, 1) 100%);
-            filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cecece', endColorstr='#f8f8f8',GradientType=0 );
-            -webkit-border-radius: 7px;
-            -moz-border-radius: 7px;
-            border-radius: 7px;
-            min-height: 35px;
-            width: 100%;
-            height: 100px;
-            border: 0px #6F6F6F;
-            box-sizing: border-box;
-            -webkit-box-sizing: border-box;
-            -moz-box-sizing: border-box;
-            outline-width: 0px;
-            font-size: 16px;
-            padding: 6px;
-        }
+            }
 
-         
-        .onepx-border{
-           border: 1px solid black;
+            .gradient{
+                background: #CECECE;
+                background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJod…EiIGhlaWdodD0iMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+);
+                background: -moz-linear-gradient(top, rgba(206, 206, 206, 1) 0%, rgba(248, 248, 248, 1) 100%);
+                background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(206, 206, 206, 1)), color-stop(100%,rgba(248, 248, 248, 1)));
+                background: -webkit-linear-gradient(top, rgba(206, 206, 206, 1) 0%,rgba(248, 248, 248, 1) 100%);
+                background: -o-linear-gradient(top, rgba(206, 206, 206, 1) 0%,rgba(248, 248, 248, 1) 100%);
+                background: -ms-linear-gradient(top, rgba(206, 206, 206, 1) 0%,rgba(248, 248, 248, 1) 100%);
+                background: linear-gradient(top, rgba(206, 206, 206, 1) 0%,rgba(248, 248, 248, 1) 100%);
+                filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#cecece', endColorstr='#f8f8f8',GradientType=0 );
+                -webkit-border-radius: 7px;
+                -moz-border-radius: 7px;
+                border-radius: 7px;
+                min-height: 35px;
+                width: 100%;
+                height: 100px;
+                border: 0px #6F6F6F;
+                box-sizing: border-box;
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+                outline-width: 0px;
+                font-size: 16px;
+                padding: 6px;
+            }
 
-         }
-         .content{
-           height: 400px;
-           margin: 0px;
-           width: 485px;
-           position: relative;
-         }
-         
-         .buttons{
-             position: absolute;
-             bottom: 0px;
-             right: 0px;
-         }
-         
-         #filters{
-            height: 224px;
-            overflow: auto;
-         }
-         
-        #filters > div select{
-            width: 100px;
-            margin-bottom: 5px;
-         }
 
-        #filters > div select.filter{
-            width: 60px;
-        }
+            .onepx-border{
+                border: 1px solid black;
 
-        #filters > div input{
-            width: 160px;
-            height: 30px;
-            margin-bottom: 5px;
-        }
-        
-        #filters > div button{
-            width: 66px;
-            height: 30px;
-            margin: 0px 0px 5px 5px;
-        }
-        
-        .filterbuttons{
-             position: absolute;
-             bottom: 0px;
-             
-         }
-         
-         label{
-             font-size: 10px;
-             font-weight: bold;
-             font-size: 19px;
-         }
-         div.errors{
-             text-align: center;
-             color: red;
-             }
-            
-    </style>
-    <script>
-        document.addEvent("domready", function() {
-            var docTitles = {{doc.titles|json_encode|raw}};
-            var docFilters = {{doc.filters|json_encode|raw}};
-            var filterTypes = {{filterTypes|json_encode|raw}};
-            var filters = document.id("filters");
-            var addFilter = function(f) {
-                var index = Math.floor(Math.random() * 10000000);
-                var filterline = new Element('div');
-                var title = new Element('select', {'name': 'filters[' + index + '][name]'});
-                docTitles.each(function(t) {
-                    var option = new Element('option', {
-                        'value': t,
-                        'text': t
-                    }).inject(title);
-                    if (f.name === t) {
-                        option.set('selected', 'selected');
-                    }
-                });
-                title.inject(filterline);
-                var filter = new Element('select', {'class':'filter','name': 'filters[' + index + '][filter]'});
-                filterTypes.each(function(t) {
-                    var option = new Element('option', {'value': t, 'text': t}).inject(filter);
-                    if (f.filter === t) {
-                        option.set('selected', 'selected');
-                    }
-                });
-                filter.inject(filterline);
-                filterline.inject(filters);
+            }
+            .content{
+                height: 400px;
+                margin: 0px;
+                width: 485px;
+                position: relative;
+            }
 
-                new Element('input', {
-                    'type': 'text',
-                    'value': f.value,
-                    'name': 'filters[' + index + '][value]'
-                }).inject(filterline);
+            .buttons{
+                position: absolute;
+                bottom: 0px;
+                right: 0px;
+            }
 
-                new Element('button', {
-                    'html': 'Delete',
-                    'class': "btn btn-danger",
-                    'events': {
-                        'click': function() {
-                            filterline.destroy();
+            #filters{
+                height: 224px;
+                overflow: auto;
+            }
+
+            #filters > div select{
+                width: 100px;
+                margin-bottom: 5px;
+            }
+
+            #filters > div select.filter{
+                width: 90px;
+            }
+
+            #filters > div input{
+                width: 160px;
+                height: 30px;
+                margin-bottom: 5px;
+            }
+
+            #filters > div button{
+                width: 66px;
+                height: 30px;
+                margin: 0px 0px 5px 5px;
+            }
+
+            .filterbuttons{
+                position: absolute;
+                bottom: 0px;
+
+            }
+
+            label{
+                font-size: 10px;
+                font-weight: bold;
+                font-size: 19px;
+            }
+            div.errors{
+                text-align: center;
+                color: red;
+            }
+
+            .message{
+                font-size: 23px;
+                text-align: center;
+                padding-top: 140px;
+            }
+
+        </style>
+        <script>
+            document.addEvent("domready", function() {
+                var docTitles = {{doc.titles|json_encode|raw}};
+                var docFilters = {{doc.filters|json_encode|raw}};
+                var filterTypes = {{filterTypes|json_encode|raw}};
+                var filters = document.id("filters");
+                var addFilter = function(filterRule) {
+                    var index = Math.floor(Math.random() * 10000000);
+                    var filterline = new Element('div');
+                    var title = new Element('select', {'name': 'filters[' + index + '][name]'});
+                    docTitles.each(function(t) {
+                        var option = new Element('option', {
+                            'value': t,
+                            'text': t
+                        }).inject(title);
+                        if (filterRule.name === t) {
+                            option.set('selected', 'selected');
+                        }
+                    });
+                    title.inject(filterline);
+                    function checkTitle(state) {
+                        if (state) {
+                            title.setStyle('display', 'none');
+                        } else {
+                            title.setStyle('display', 'inline-block');
                         }
                     }
-                }).inject(filterline);
-            }
+                    var filter = new Element('select', {
+                        'class': 'filter',
+                        'name': 'filters[' + index + '][filter]',
+                        'events':{
+                             'change':function(){
+                                  checkTitle(this.value  == 'aroundme');
+                             }
+                          }
+                    });
+                    filterTypes.each(function(t) {
+                        var option = new Element('option', {
+                         'value': t,
+                         'text': (t == 'aroundme' ? 'Around me' : t)
+                         }).inject(filter);
 
-            init = function() {
-                docFilters.each(function(f) {
-                    addFilter(f);
-                });
-            }
+                        if (filterRule.filter === t) {
+                            checkTitle(filterRule.filter == 'aroundme');
+                            option.set('selected', 'selected');
+                        }
+                    });
+                    filter.inject(filterline);
+                    filterline.inject(filters);
 
-            document.id('addfilter').addEvent('click', function(e) {
-                e.stop();
-                if (docTitles[0]) {
-                    addFilter({"name": docTitles[0], "filter": filterTypes[0], 'value': ''});
+                    new Element('input', {
+                        'type': 'text',
+                        'value': filterRule.value,
+                        'name': 'filters[' + index + '][value]'
+                    }).inject(filterline);
+
+                    new Element('button', {
+                        'html': 'Delete',
+                        'class': "btn btn-danger",
+                        'events': {
+                            'click': function() {
+                                filterline.destroy();
+                            }
+                        }
+                    }).inject(filterline);
                 }
-            });
+                init = function() {
+                    docFilters.each(function(f) {
+                        addFilter(f);
+                    });
+                }
+
+                document.id('addfilter').addEvent('click', function(e) {
+                    e.stop();
+                    if (docTitles[0]) {
+                        addFilter({"name": docTitles[0], "filter": filterTypes[0], 'value': ''});
+                    }
+                });
 
 
-            document.id('reset').addEvent('click', function(e) {
-                e.stop();
-                filters.set('html', '');
+                document.id('reset').addEvent('click', function(e) {
+                    e.stop();
+                    filters.set('html', '');
+                    init();
+                });
                 init();
             });
-            init();
-        });
         </script>
     </head>
     <body style="background: transparent;">
         <div class="content" >
+            {% if action=="save" and error=='' %}
+            <form method="post">
+                <div class="message">Your extension has been saved</div>
+                <input type="hidden" name="url" value="{{doc.url}}" >
+            </form>
+            {%else%}
             <form method="post">
                 <div class="errors">{{error}}</div>
                 <div>
                     <label>Spreadsheet URL</label>
-                     <textarea name="url" class="gradient onepx-border" >value="{{doc.url}}" </textarea>
+                    <textarea name="url" class="gradient onepx-border" >{{doc.url}}</textarea>
                 </div>
-
                 <div class="buttons">
-                {%if doc.titles|length>0%}
-                        <button type="submit"  class="btn btn-success" >Save</button>
-                {% else%}
-                        <button type="submit"  class="btn btn-success" >apply</button>
-                {%endif%}
+                        {%if doc.titles|length>0%}
+                    <button type="submit" name="action" value="save" class="btn btn-success" >Save</button>
+                        {% else%}
+                    <button type="submit" name="action" value="applay"  class="btn btn-success" >apply</button>
+                        {%endif%}
                 </div>
                 <div>
                     <div id="filters" ></div>
-            {%if doc.titles|length>0%}
+                    {%if doc.titles|length>0%}
                     <div class="filterbuttons" >
                         <button class="btn" id="addfilter" >Add filter</button>
                         <button class="btn" id="reset" >Reset</button>
                     </div>
-            {%endif%}
+                    {%endif%}
                 </div>
             </form>
-            </div>
-      </body>
+                {%endif%}
+        </div>
+    </body>
 </html>
