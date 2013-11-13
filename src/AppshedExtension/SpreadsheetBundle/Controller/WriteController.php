@@ -131,8 +131,9 @@ class WriteController extends Controller {
         $em = $this->getDoctrine()->getManager();
         $doc = $em->getRepository('AppshedExtensionSpreadsheetBundle:Doc')->findOneBy(array('itemsecret' => $secret));
         if (!is_null($doc)) {
+
             $adapter = $this->getSpreadsheetAdapter();
-       //     $existingTitles = $doc->getTitles();
+//            $existingTitles = $doc->getTitles();
             $existingTitles = $this->getTitlesAction($doc->getKey());
 
             $store = false;
