@@ -101,7 +101,7 @@ class ReadController extends Controller {
                 if($url==false){
                     $this->errors[] = 'Spreadsheet url is empty';
                 }else{
-                    $this->errors[] = 'Spreadsheet url not supported or broken';
+                    $this->errors[] = 'Spreadsheet url is not supported or broken';
                 }
             }
         }
