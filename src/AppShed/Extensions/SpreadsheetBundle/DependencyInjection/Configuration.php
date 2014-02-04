@@ -1,6 +1,6 @@
 <?php
 
-namespace AppshedExtension\SpreadsheetBundle\DependencyInjection;
+namespace AppShed\Extensions\SpreadsheetBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -18,7 +18,16 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('appshed_spreadsheet');
+        $rootNode = $treeBuilder->root('app_shed_extensions_spreadsheet')->
+            children()->
+            arrayNode("google")->
+            children()->
+            scalarNode("username")->isRequired()->cannotBeEmpty()->end()->
+            scalarNode("password")->isRequired()->cannotBeEmpty()->end()->
+            end()->
+            end()->
+            end()->
+            end();
 
         // Here you should define the parameters that are allowed to
         // configure your bundle. See the documentation linked above for

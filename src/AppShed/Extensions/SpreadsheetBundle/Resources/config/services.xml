@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+    <parameters>
+        <parameter key="appshed_extensions_spreadsheet.google_username"></parameter>
+        <parameter key="appshed_extensions_spreadsheet.google_password"></parameter>
+    </parameters>
+
+    <services>
+        <service id="appshed_extensions_spreadsheet.spreadsheet_adapter"
+                 class="ZendGData\Spreadsheets">
+            <argument type="service" id="appshed_extensions_spreadsheet.google_client"/>
+        </service>
+        <service id="appshed_extensions_spreadsheet.google_client"
+                 class="ZendGData\HttpClient"
+                 factory-class="ZendGData\ClientLogin"
+                 factory-method="getHttpClient">
+            <argument>%appshed_extensions_spreadsheet.google_username%</argument>
+            <argument>%appshed_extensions_spreadsheet.google_password%</argument>
+            <argument type="constant">ZendGData\Spreadsheets::AUTH_SERVICE_NAME</argument>
+            <argument type="service" id="appshed_extensions_spreadsheet.http_client" />
+        </service>
+        <service id="appshed_extensions_spreadsheet.http_client"
+                 class="ZendGData\HttpClient">
+            <argument type="service" id="appshed_extensions_spreadsheet.client_adapter" />
+        </service>
+        <service id="appshed_extensions_spreadsheet.client_adapter"
+                 class="Zend\Http\Client\Adapter\Curl">
+            <call method="setCurlOption">
+                <argument type="constant">CURLOPT_SSL_VERIFYPEER</argument>
+                <argument>false</argument>
+            </call>
+            <call method="setCurlOption">
+                <argument type="constant">CURLOPT_SSL_VERIFYHOST</argument>
+                <argument>false</argument>
+            </call>
+        </service>
+    </services>
+</container>

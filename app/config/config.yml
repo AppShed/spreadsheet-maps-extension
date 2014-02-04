@@ -63,3 +63,8 @@ swiftmailer:
     username:  %mailer_user%
     password:  %mailer_password%
     spool:     { type: memory }
+
+app_shed_extensions_spreadsheet:
+    google:
+        username: %google_username%
+        password: %google_password%

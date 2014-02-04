@@ -1,5 +1,5 @@
 appshed_spreadsheet:
-    resource: "@AppshedExtensionSpreadsheetBundle/Controller/"
+    resource: "@AppShedExtensionsSpreadsheetBundle/Controller/"
     type:     annotation
     prefix:   /
 

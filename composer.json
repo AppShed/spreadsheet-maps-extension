@@ -1,8 +1,8 @@
 {
-    "name": "symfony/framework-standard-edition",
+    "name": "appshed/spreadsheet-extension",
     "license": "MIT",
     "type": "project",
-    "description": "The \"Symfony Standard Edition\" distribution",
+    "description": "The AppShed Google docs extension",
     "autoload": {
         "psr-0": {"": "src/"}
     },
@@ -15,7 +15,7 @@
         "twig/extensions": "1.0.*",
         "symfony/assetic-bundle": "2.3.*",
         "symfony/swiftmailer-bundle": "2.3.*",
-        "appshed/extension-api": "dev-master",
+        "appshed/extension-api": "~2.0.0",
         "symfony/monolog-bundle": "2.3.*",
         "sensio/distribution-bundle": "2.3.*",
         "sensio/framework-extra-bundle": "2.3.*",

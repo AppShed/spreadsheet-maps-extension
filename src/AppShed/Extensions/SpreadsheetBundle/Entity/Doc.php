@@ -1,6 +1,6 @@
 <?php
 
-namespace AppshedExtension\SpreadsheetBundle\Entity;
+namespace AppShed\Extensions\SpreadsheetBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -11,7 +11,8 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Table()
  * @ORM\Entity()
  */
-class Doc {
+class Doc
+{
 
     /**
      * @var integer
@@ -25,9 +26,10 @@ class Doc {
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
-    public function getId() {
+    public function getId()
+    {
         return $this->id;
     }
 
@@ -41,17 +43,19 @@ class Doc {
      * Get Date
      * @return Date
      */
-    public function getDate() {
+    public function getDate()
+    {
         return $this->date;
     }
 
     /**
      * Set Date
      *
-     * @param string $Date 
+     * @param string $Date
      * @return Guest
      */
-    public function setDate($x) {
+    public function setDate($x)
+    {
         $this->date = $x;
         return $this;
     }
@@ -67,7 +71,8 @@ class Doc {
      * Get titles
      * @return Titles
      */
-    public function getTitles() {
+    public function getTitles()
+    {
 
         return is_array($this->titles) ? $this->titles : array();
     }
@@ -75,10 +80,11 @@ class Doc {
     /**
      * Set titles
      *
-     * @param string $titles 
+     * @param string $titles
      * @return Doc
      */
-    public function setTitles($titles) {
+    public function setTitles($titles)
+    {
         $this->titles = $titles;
         return $this;
     }
@@ -94,17 +100,19 @@ class Doc {
      * Get url
      * @return Url
      */
-    public function getUrl() {
+    public function getUrl()
+    {
         return $this->url;
     }
 
     /**
      * Set url
      *
-     * @param string $url 
+     * @param string $url
      * @return Doc
      */
-    public function setUrl($url) {
+    public function setUrl($url)
+    {
         $this->url = $url;
         return $this;
     }
@@ -120,17 +128,19 @@ class Doc {
      * Get key
      * @return Key
      */
-    public function getKey() {
+    public function getKey()
+    {
         return $this->key;
     }
 
     /**
      * Set key
      *
-     * @param string $key 
+     * @param string $key
      * @return Doc
      */
-    public function setKey($key) {
+    public function setKey($key)
+    {
         $this->key = $key;
         return $this;
     }
@@ -146,17 +156,19 @@ class Doc {
      * Get itemsecret
      * @return Itemsecret
      */
-    public function getItemsecret() {
+    public function getItemsecret()
+    {
         return $this->itemsecret;
     }
 
     /**
      * Set itemsecret
      *
-     * @param string $itemsecret 
+     * @param string $itemsecret
      * @return Doc
      */
-    public function setItemsecret($itemsecret) {
+    public function setItemsecret($itemsecret)
+    {
         $this->itemsecret = $itemsecret;
         return $this;
     }
@@ -172,17 +184,19 @@ class Doc {
      * Get filters
      * @return Filters
      */
-    public function getFilters() {
+    public function getFilters()
+    {
         return is_array($this->filters) ? $this->filters : array();
     }
 
     /**
      * Set filters
      *
-     * @param string $filters 
+     * @param string $filters
      * @return Doc
      */
-    public function setFilters($filters) {
+    public function setFilters($filters)
+    {
         $this->filters = $filters;
         return $this;
     }

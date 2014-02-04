@@ -1,6 +1,6 @@
 <?php
 
-namespace AppshedExtension\SpreadsheetBundle\Tests\Controller;
+namespace AppShed\Extensions\SpreadsheetBundle\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
