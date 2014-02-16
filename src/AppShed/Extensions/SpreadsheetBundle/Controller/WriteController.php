@@ -200,22 +200,6 @@ class WriteController extends SpreadsheetController
     }
 
     /**
-     * Finds the key query param from a url
-     *
-     * @param $docUrl
-     * @return string
-     */
-    private function getKey($docUrl)
-    {
-        $docUrlParts = parse_url($docUrl);
-        if (isset($docUrlParts['query'])) {
-            parse_str($docUrlParts['query'], $queryParams);
-            return isset($queryParams['key']) ? $queryParams['key'] : null;
-        }
-        return null;
-    }
-
-    /**
      * Find the next empty cell in the first row
      *
      * @param $key

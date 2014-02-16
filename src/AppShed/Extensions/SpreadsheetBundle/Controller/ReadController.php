@@ -4,6 +4,7 @@ namespace AppShed\Extensions\SpreadsheetBundle\Controller;
 
 use AppShed\Remote\Element\Item\HTML;
 use AppShed\Remote\Element\Item\Link;
+use AppShed\Remote\Element\Item\Text;
 use AppShed\Remote\Element\Screen\Screen;
 use AppShed\Remote\HTML\Remote;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -12,16 +13,13 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use AppShed\Extensions\SpreadsheetBundle\Entity\Doc;
+use ZendGData\Spreadsheets\ListQuery;
 
 /**
  * @Route("/spreadsheet/read", service="app_shed_extensions_spreadsheet.controller.read")
  */
 class ReadController extends SpreadsheetController
 {
-
-
-    private $errors = array();
-
     /**
      * @Route("/edit/")
      * @Template()
@@ -33,6 +31,7 @@ class ReadController extends SpreadsheetController
         $em = $this->getDoctrine()->getManager();
         $doc = $em->getRepository('AppShedExtensionsSpreadsheetBundle:Doc')->findOneBy(array('itemsecret' => $secret));
 
+        $errors = '';
 
         if (is_null($doc)) {
             $doc = new Doc();
@@ -66,9 +65,9 @@ class ReadController extends SpreadsheetController
                 $em->flush();
             } else {
                 if ($url == false) {
-                    $this->errors[] = 'Spreadsheet url is empty';
+                    $errors = 'Spreadsheet url is empty';
                 } else {
-                    $this->errors[] = 'Spreadsheet url is not supported or broken';
+                    $errors = 'Spreadsheet url is not supported or broken';
                 }
             }
         }
@@ -76,7 +75,7 @@ class ReadController extends SpreadsheetController
         return array(
             'doc' => $doc,
             'action' => $action,
-            'error' => $this->getErrors()
+            'error' => $errors
         );
     }
 
@@ -85,66 +84,83 @@ class ReadController extends SpreadsheetController
      */
     public function documentAction(Request $request)
     {
-        if(Remote::isOptionsRequest()) {
+        if (Remote::isOptionsRequest()) {
             return Remote::getCORSSymfonyResponse();
         }
 
         $secret = $request->get('identifier');
-        $type = $request->get('type', 'normal');
-
-
+        
         $doc = $this->getDoctrine()
             ->getManager()
             ->getRepository('AppShedExtensionsSpreadsheetBundle:Doc')
             ->findOneBy(array('itemsecret' => $secret));
 
-        $document = $this->getDocument(
-            $this->getSpreadsheets(),
-            $doc->getKey(),
-            $this->getFilterString($doc->getFilters())
-        );
+        if (!$doc) {
+            $screen = new Screen('Error');
+            $screen->addChild(new HTML('You must setup the extension before using it'));
+            return (new Remote($screen))->getSymfonyResponse();
+        }
 
-        //This screen will have a list of the values in A column
-        $screen = new Screen($document->getTitle());
+        try {
 
-        //For each row of the table
-        foreach ($document as $entry) {
+            $document = $this->getDocument(
+                $doc->getKey(),
+                $this->getFilterString($doc->getFilters())
+            );
 
-            $index = true;
-            $lines = $entry->getCustom();
+            //This screen will have a list of the values in A column
+            $screen = new Screen($document->getTitle());
 
-            //Each of the columns of the row
-            foreach ($lines as $customEntry) {
+            //For each row of the table
+            foreach ($document as $entry) {
 
-                $name = $customEntry->getColumnName();
-                $value = $customEntry->getText();
+                $index = true;
+                $lines = $entry->getCustom();
 
-                //If the name of a column ends with a '-' then we dont show it
-                if (((strlen($name) - 1) == strpos($name, '-')) == false) {
-                    if ($index == true) {
-                        //This screen will have all the values across the row
-                        $innerScreen = new Screen($value);
+                //Each of the columns of the row
+                foreach ($lines as $customEntry) {
 
-                        $link = new Link($value);
-                        $screen->addChild($link);
-                        $index = false;
-                        $link->setScreenLink($innerScreen);
-                    } else {
-                        if (!empty($value)) {
-                            $innerScreen->addChild(new HTML($value));
+                    $name = $customEntry->getColumnName();
+                    $value = $customEntry->getText();
+
+                    //If the name of a column ends with a '-' then we dont show it
+                    if (((strlen($name) - 1) == strpos($name, '-')) == false) {
+                        if ($index == true) {
+                            //This screen will have all the values across the row
+                            $innerScreen = new Screen($value);
+
+                            $link = new Link($value);
+                            $screen->addChild($link);
+                            $index = false;
+                            $link->setScreenLink($innerScreen);
+                        } else {
+                            if (!empty($value)) {
+                                $innerScreen->addChild(new HTML($value));
+                            }
                         }
                     }
                 }
             }
-        }
 
-        return (new Remote($screen))->getSymfonyResponse();
+            return (new Remote($screen))->getSymfonyResponse();
+        } catch (\Exception $e) {
+            $screen = new Screen('Error');
+            $screen->addChild(new HTML('There was an error reading'));
+            $screen->addChild(new Text($e->getMessage()));
+
+            $this->logger->error(
+                'Problem reading a spreadsheet',
+                [
+                    'exception' => $e
+                ]
+            );
+            return (new Remote($screen))->getSymfonyResponse();
+        }
     }
 
     private function getRowTitles($key)
     {
-        $adapter = $this->getSpreadsheets();
-        $doc = $this->getDocument($adapter, $key);
+        $doc = $this->getDocument($key);
         $titles = array();
 
         foreach ($doc as $entry) {
@@ -157,41 +173,15 @@ class ReadController extends SpreadsheetController
         return $titles;
     }
 
-
-    private function getErrors()
+    private function getDocument($key, $filter = null)
     {
-        return implode('<br>', $this->errors);
-
-    }
-
-    private function getDocument($adapter, $key, $filter = null)
-    {
-        $listFeed = array();
-        if ($adapter instanceof \ZendGData\Spreadsheets) {
-            try {
-                $query = new \ZendGData\Spreadsheets\ListQuery();
-                $query->setSpreadsheetKey($key);
-                if ($filter) {
-                    $query->setSpreadsheetQuery($filter);
-                }
-                $listFeed = $adapter->getListFeed($query);
-
-            } catch (HttpException $exc) {
-                $this->errors[] = 'No read premissoin or other error';
-            }
+        $query = new ListQuery();
+        $query->setSpreadsheetKey($key);
+        if ($filter) {
+            $query->setSpreadsheetQuery($filter);
         }
+        $listFeed = $this->getSpreadsheets()->getListFeed($query);
         return $listFeed;
-    }
-
-    private function getKey($docUrl)
-    {
-        $params = array();
-        $urlParts = parse_url($docUrl);
-        if (isset($urlParts['query'])) {
-            parse_str($urlParts['query'], $params);
-            $urlParams = $params;
-        }
-        return isset($urlParams['key']) ? $urlParams['key'] : null;
     }
 
     private function getFilterString($filter)
@@ -221,7 +211,6 @@ class ReadController extends SpreadsheetController
 
     private function getAroundMeQuery($distance)
     {
-        $this->aroundme = $distance;
         $center = array(
             'lat' => isset($_GET['userlat']) ? $_GET['userlat'] : 0,
             'lng' => isset($_GET['userlng']) ? $_GET['userlng'] : 0
@@ -235,7 +224,25 @@ class ReadController extends SpreadsheetController
         return implode(' AND ', $filters);
     }
 
-    public function distanceOrt($position, $point, $limit = false)
+    private function getBounds($center, $radius)
+    {
+        $conv = $this->getConv($center);
+        $bounces = array();
+
+        $top = $this->getPointPosition($conv, $center, $radius, 0);
+        $right = $this->getPointPosition($conv, $center, $radius, 90);
+        $bottom = $this->getPointPosition($conv, $center, $radius, 180);
+        $left = $this->getPointPosition($conv, $center, $radius, 270);
+        $bounces['minLng'] = $left['lng'];
+        //$bounces['centerLng']=$center['lng'];
+        $bounces['maxLng'] = $right['lng'];
+        $bounces['minLat'] = $bottom['lat'];
+        //$bounces['centerLat']=$center['lat'];
+        $bounces['maxLat'] = $top['lat'];
+        return $bounces;
+    }
+
+    private function distanceOrt($position, $point, $limit = false)
     {
         $ra = M_PI / 180;
         $b = $position['lat'] * $ra;
@@ -267,7 +274,7 @@ class ReadController extends SpreadsheetController
         );
     }
 
-    public function pointPosion($conv, $center, $r, $angle)
+    private function getPointPosition($conv, $center, $r, $angle)
     {
         $r = $r / 1000;
         return array(
@@ -276,33 +283,4 @@ class ReadController extends SpreadsheetController
             'angle' => $angle
         );
     }
-
-    public function getTextLength($d)
-    {
-        if ($d > 1000) {
-            $d = $d / 1000;
-            return round($d, 2) . 'Km';
-        } else {
-            return round($d) . 'm';
-        }
-    }
-
-    public function getBounds($center, $radius)
-    {
-        $conv = $this->getConv($center);
-        $bounces = array();
-
-        $top = $this->pointPosion($conv, $center, $radius, 0);
-        $right = $this->pointPosion($conv, $center, $radius, 90);
-        $bottom = $this->pointPosion($conv, $center, $radius, 180);
-        $left = $this->pointPosion($conv, $center, $radius, 270);
-        $bounces['minLng'] = $left['lng'];
-        //$bounces['centerLng']=$center['lng'];
-        $bounces['maxLng'] = $right['lng'];
-        $bounces['minLat'] = $bottom['lat'];
-        //$bounces['centerLat']=$center['lat'];
-        $bounces['maxLat'] = $top['lat'];
-        return $bounces;
-    }
-
 }

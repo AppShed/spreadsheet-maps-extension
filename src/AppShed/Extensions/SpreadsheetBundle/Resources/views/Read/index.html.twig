@@ -102,10 +102,7 @@
 <body>
 <div class="content">
     {% if action=="save" and error=='' %}
-        <form method="post">
-            <div class="message">Your extension has been saved</div>
-            <input type="hidden" name="url" value="{{ doc.url }}">
-        </form>
+        <div class="message">Your extension has been saved</div>
     {% else %}
         <form method="post">
             <div class="errors">{{ error }}</div>
@@ -117,7 +114,7 @@
                 {% if doc.titles|length>0 %}
                     <button type="submit" name="action" value="save" class="btn btn-success">Save</button>
                 {% else %}
-                    <button type="submit" name="action" value="applay" class="btn btn-success">apply</button>
+                    <button type="submit" name="action" value="apply" class="btn btn-success">Apply</button>
                 {% endif %}
             </div>
             <div>
