@@ -20,14 +20,14 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder();
         $rootNode = $treeBuilder->root('app_shed_extensions_spreadsheet')->
             children()->
-            arrayNode("google")->
-            children()->
-            scalarNode("username")->isRequired()->cannotBeEmpty()->end()->
-            scalarNode("password")->isRequired()->cannotBeEmpty()->end()->
+                arrayNode("google")->
+                    children()->
+                        scalarNode("username")->isRequired()->cannotBeEmpty()->end()->
+                        scalarNode("password")->isRequired()->cannotBeEmpty()->end()->
+                    end()->
+                end()->
             end()->
-            end()->
-            end()->
-            end();
+        end();
 
         // Here you should define the parameters that are allowed to
         // configure your bundle. See the documentation linked above for

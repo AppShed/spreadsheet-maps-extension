@@ -9,36 +9,26 @@ use AppShed\Remote\HTML\Remote;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use AppShed\Extensions\SpreadsheetBundle\Entity\Doc;
 
 /**
- * @Route("/spreadsheet/read")
+ * @Route("/spreadsheet/read", service="app_shed_extensions_spreadsheet.controller.read")
  */
-class ReadController extends Controller
+class ReadController extends SpreadsheetController
 {
 
 
     private $errors = array();
 
-    private $filterTypes = array(
-        '<',
-        '>',
-        '=',
-        '!=',
-        '<=',
-        '>=',
-        'aroundme'
-    );
-
     /**
      * @Route("/edit/")
      * @Template()
      */
-    public function indexAction()
+    public function indexAction(Request $request)
     {
         $action = '';
-        $request = $this->getRequest();
         $secret = $request->get('identifier');
         $em = $this->getDoctrine()->getManager();
         $doc = $em->getRepository('AppShedExtensionsSpreadsheetBundle:Doc')->findOneBy(array('itemsecret' => $secret));
@@ -69,7 +59,7 @@ class ReadController extends Controller
 
                 $doc->setUrl($url);
                 $doc->setKey($key);
-                $doc->setTitles($this->getTitles($key));
+                $doc->setTitles($this->getRowTitles($key));
                 $doc->setFilters(array_values($filters));
 
                 $em->persist($doc);
@@ -86,25 +76,19 @@ class ReadController extends Controller
         return array(
             'doc' => $doc,
             'action' => $action,
-            'error' => $this->getErrors(),
-            'filterTypes' => $this->filterTypes
+            'error' => $this->getErrors()
         );
-    }
-
-    /**
-     * @return \ZendGData\Spreadsheets
-     */
-    private function getSpreadsheetAdapter()
-    {
-        return $this->get('appshed_extensions_spreadsheet.spreadsheet_adapter');
     }
 
     /**
      * @Route("/document/")
      */
-    public function documentAction()
+    public function documentAction(Request $request)
     {
-        $request = $this->getRequest();
+        if(Remote::isOptionsRequest()) {
+            return Remote::getCORSSymfonyResponse();
+        }
+
         $secret = $request->get('identifier');
         $type = $request->get('type', 'normal');
 
@@ -115,25 +99,30 @@ class ReadController extends Controller
             ->findOneBy(array('itemsecret' => $secret));
 
         $document = $this->getDocument(
-            $this->getSpreadsheetAdapter(),
+            $this->getSpreadsheets(),
             $doc->getKey(),
             $this->getFilterString($doc->getFilters())
         );
 
+        //This screen will have a list of the values in A column
         $screen = new Screen($document->getTitle());
 
+        //For each row of the table
         foreach ($document as $entry) {
 
             $index = true;
             $lines = $entry->getCustom();
 
+            //Each of the columns of the row
             foreach ($lines as $customEntry) {
 
                 $name = $customEntry->getColumnName();
                 $value = $customEntry->getText();
 
+                //If the name of a column ends with a '-' then we dont show it
                 if (((strlen($name) - 1) == strpos($name, '-')) == false) {
                     if ($index == true) {
+                        //This screen will have all the values across the row
                         $innerScreen = new Screen($value);
 
                         $link = new Link($value);
@@ -152,9 +141,9 @@ class ReadController extends Controller
         return (new Remote($screen))->getSymfonyResponse();
     }
 
-    private function getTitles($key)
+    private function getRowTitles($key)
     {
-        $adapter = $this->getSpreadsheetAdapter();
+        $adapter = $this->getSpreadsheets();
         $doc = $this->getDocument($adapter, $key);
         $titles = array();
 
@@ -186,9 +175,6 @@ class ReadController extends Controller
                     $query->setSpreadsheetQuery($filter);
                 }
                 $listFeed = $adapter->getListFeed($query);
-
-//               echo  $listFeed->getTitleValue().PHP_EOL;
-//               echo  $listFeed->getTitle().PHP_EOL;
 
             } catch (HttpException $exc) {
                 $this->errors[] = 'No read premissoin or other error';

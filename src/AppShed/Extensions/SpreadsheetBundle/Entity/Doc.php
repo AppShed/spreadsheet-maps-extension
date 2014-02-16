@@ -60,7 +60,6 @@ class Doc
         return $this;
     }
 
-//////////////////////////////// titles ////////////////////////////
     /**
      * @var titles
      * @ORM\Column(name="titles", type="array",  nullable=true)
@@ -89,7 +88,6 @@ class Doc
         return $this;
     }
 
-    //////////////////////////////// url ////////////////////////////
     /**
      * @var url
      * @ORM\Column(name="url", type="string", length=355, nullable=true)
@@ -117,7 +115,6 @@ class Doc
         return $this;
     }
 
-    //////////////////////////////// key ////////////////////////////
     /**
      * @var key
      * @ORM\Column(name="dockey", type="string", length=255, nullable=true)
@@ -145,7 +142,6 @@ class Doc
         return $this;
     }
 
-    //////////////////////////////// itemsecret ////////////////////////////
     /**
      * @var itemsecret
      * @ORM\Column(name="itemsecret", type="string", length=255, nullable=true)
@@ -173,7 +169,6 @@ class Doc
         return $this;
     }
 
-    //////////////////////////////// filters ////////////////////////////
     /**
      * @var filters
      * @ORM\Column(name="filters", type="array")
