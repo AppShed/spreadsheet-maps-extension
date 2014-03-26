@@ -116,10 +116,9 @@ class WriteController extends SpreadsheetController
 
             $store = false;
             foreach ($rowData as $titleName => $value) {
-                if (strlen($value) == '') {
+                if (trim($value) == '') {
                     unset($rowData[$titleName]);
-                }
-                if (!in_array($titleName, $existingTitles)) {
+                } elseif (!in_array($titleName, $existingTitles)) {
                     $store = true;
                     $this->addTitle($titleName, $doc->getKey());
                     $existingTitles[] = $titleName;
