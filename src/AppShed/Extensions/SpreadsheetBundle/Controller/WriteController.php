@@ -23,6 +23,7 @@ class WriteController extends SpreadsheetController
 
     /**
      * @Route("/edit")
+     * @Route("/edit/")
      * @Template()
      */
     public function indexAction(Request $request)
@@ -88,6 +89,7 @@ class WriteController extends SpreadsheetController
     }
 
     /**
+     * @Route("/document")
      * @Route("/document/")
      */
     public function documentAction(Request $request)

@@ -21,6 +21,7 @@ use ZendGData\Spreadsheets\ListQuery;
 class ReadController extends SpreadsheetController
 {
     /**
+     * @Route("/edit")
      * @Route("/edit/")
      * @Template()
      */
@@ -80,6 +81,7 @@ class ReadController extends SpreadsheetController
     }
 
     /**
+     * @Route("/document")
      * @Route("/document/")
      */
     public function documentAction(Request $request)
