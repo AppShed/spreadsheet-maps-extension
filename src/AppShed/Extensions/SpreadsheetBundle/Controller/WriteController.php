@@ -98,7 +98,7 @@ class WriteController extends SpreadsheetController
             return Remote::getCORSSymfonyResponse();
         }
 
-        $rowData = Remote::getRequestVariables();
+        $rowData = $this->cleanData(Remote::getRequestVariables());
 
         $secret = $request->get('identifier');
 
@@ -116,9 +116,7 @@ class WriteController extends SpreadsheetController
 
             $store = false;
             foreach ($rowData as $titleName => $value) {
-                if (trim($value) == '') {
-                    unset($rowData[$titleName]);
-                } elseif (!in_array($titleName, $existingTitles)) {
+                if (!in_array($titleName, $existingTitles)) {
                     $store = true;
                     $this->addTitle($titleName, $doc->getKey());
                     $existingTitles[] = $titleName;
@@ -215,5 +213,22 @@ class WriteController extends SpreadsheetController
             $col++;
         }
         return ord($col) - 64;
+    }
+
+    /**
+     * The api doesn't like keys with spaces, _ etc
+     *
+     * @param array $data
+     * @return array
+     */
+    private function cleanData($data)
+    {
+        $rowData = [];
+        foreach ($data as $titleName => $value) {
+            if (trim($value) != '') {
+                $rowData[preg_replace('/[^a-zA-Z0-9]/', '', $titleName)] = $value;
+            }
+        }
+        return $rowData;
     }
 }
