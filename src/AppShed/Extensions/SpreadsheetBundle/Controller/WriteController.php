@@ -125,7 +125,6 @@ class WriteController extends SpreadsheetController
 
             if ($store) {
                 $doc->setTitles(array_unique($existingTitles));
-                $em->persist($doc);
                 $em->flush();
             }
 
@@ -226,7 +225,7 @@ class WriteController extends SpreadsheetController
         $rowData = [];
         foreach ($data as $titleName => $value) {
             if (trim($value) != '') {
-                $rowData[preg_replace('/[^a-zA-Z0-9]/', '', $titleName)] = $value;
+                $rowData[preg_replace('/[^a-zA-Z]/', '', $titleName)] = $value;
             }
         }
         return $rowData;
