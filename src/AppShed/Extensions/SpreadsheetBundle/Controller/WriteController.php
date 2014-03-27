@@ -128,6 +128,11 @@ class WriteController extends SpreadsheetController
                 $em->flush();
             }
 
+            foreach ($existingTitles as $titleName) {
+                if (!isset($rowData[$titleName])) {
+                    $rowData[$titleName] = '';
+                }
+            }
 
             if (count($rowData) > 0) {
                 $this->getSpreadsheets()->insertRow($rowData, $doc->getKey(), 1);
