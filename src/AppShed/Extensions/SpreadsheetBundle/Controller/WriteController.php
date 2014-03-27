@@ -140,7 +140,8 @@ class WriteController extends SpreadsheetController
             $this->logger->error(
                 'Problem accessing a spreadsheet',
                 [
-                    'exception' => $e
+                    'exception' => $e,
+                    'rowData' => $rowData
                 ]
             );
             return (new Remote($screen))->getSymfonyResponse();
