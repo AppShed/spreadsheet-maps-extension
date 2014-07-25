@@ -55,11 +55,13 @@ class WriteController extends SpreadsheetController
             try {
                 $worksheet = $this->getDocument($key);
                 
-                $titles = array();
                 
                 $lines = $worksheet->getContentsAsRows();
                 if (is_array($lines) && isset($lines['0']) && is_array($lines['0'])) {
                     $titles = array_keys($lines['0']);
+                }
+                if(!is_array($titles)){
+                     $titles = array();
                 }
 
                 $doc->setUrl($url);
