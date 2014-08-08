@@ -234,7 +234,7 @@ class WriteController extends SpreadsheetController
     {
         $rowData = [];
         foreach ($data as $titleName => $value) {
-            if (trim($value) != '') {
+            if (!is_array($value) && trim($value) != '') {
                 $rowData[preg_replace('/[^a-z]/', '', strtolower($titleName))] = $value;
             }
         }
