@@ -60,12 +60,11 @@ abstract class SpreadsheetController extends Controller
      * @param $docUrl
      * @return string
      */
-    protected function getKey($docUrl)
-    {
-        $docUrlParts = parse_url($docUrl);
-        if (isset($docUrlParts['query'])) {
-            parse_str($docUrlParts['query'], $queryParams);
-            return isset($queryParams['key']) ? $queryParams['key'] : null;
+    protected function getKey($docUrl) 
+	{
+        preg_match('/([a-zA-Z0-9_-]){44}/',$docUrl,$matches);
+        if (isset($matches['0'])) {
+            return $matches['0'];
         }
         return null;
     }
