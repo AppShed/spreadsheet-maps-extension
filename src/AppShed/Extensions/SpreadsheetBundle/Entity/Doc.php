@@ -117,7 +117,7 @@ class Doc
 
     /**
      * @var address
-     * @ORM\Column(name="address", type="string", length=355, nullable=true)
+     * @ORM\Column(name="address", type="string", length=255, nullable=true)
      */
     protected $address;
 
@@ -127,7 +127,7 @@ class Doc
      */
     public function getAddress()
     {
-        return $this->address;
+        return ($this->address!='') ? $this->address : null;
     }
 
     /**
