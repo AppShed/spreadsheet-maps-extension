@@ -116,6 +116,33 @@ class Doc
     }
 
     /**
+     * @var address
+     * @ORM\Column(name="address", type="string", length=355, nullable=true)
+     */
+    protected $address;
+
+    /**
+     * Get Address
+     * @return string
+     */
+    public function getAddress()
+    {
+        return $this->address;
+    }
+
+    /**
+     * Set Address
+     *
+     * @param string address
+     * @return Doc
+     */
+    public function setAddress($address)
+    {
+        $this->address = $address;
+        return $this;
+    }
+
+    /**
      * @var key
      * @ORM\Column(name="dockey", type="string", length=255, nullable=true)
      */
