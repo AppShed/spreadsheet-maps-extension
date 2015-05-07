@@ -110,6 +110,11 @@
                 <label>Spreadsheet URL</label>
                 <textarea name="url" class="gradient onepx-border">{{ doc.url }}</textarea>
                 <div>You must set the settings to 'Anyone who has the link can view' on Google Drive</div>
+
+                <br/>
+                <div>If you want to add an address pin on the map, please indicate the name of a column below</div>
+                <input name="address" type="text" value="{{ doc.address }}"/>
+
             </div>
             <div class="buttons">
                 {% if doc.titles|length>0 %}
