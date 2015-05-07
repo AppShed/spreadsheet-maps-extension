@@ -51,7 +51,7 @@ class ReadController extends SpreadsheetController
 
             $url = $request->get('url', false);
 
-            $address = $request->get('address', '');
+            $address = $request->get('address', null);
 
             $action = $request->get('action', false);
 
@@ -107,6 +107,11 @@ class ReadController extends SpreadsheetController
             return (new Remote($screen))->getSymfonyResponse();
         }
 
+
+        $geoService = $this->geoService;
+
+        $address = $doc->getAddress();
+
         try {
 
             $document = $this->getDocument(
@@ -141,12 +146,10 @@ class ReadController extends SpreadsheetController
                             $link->setScreenLink($innerScreen);
                         } else {
                             if (!empty($value)) {
+                                if ($name == $address ) {
 
-                                $address = $doc->getAddress();
+                                    $geo = $geoService->getGeo($value);
 
-                                if (!empty($address) && $name == $address ) {
-
-                                    $geo = $this->readGeocode($value);
                                     if ($geo) {
                                         $marker = new Marker($name, $value, $geo[0], $geo[1]);
 
@@ -182,36 +185,6 @@ class ReadController extends SpreadsheetController
             );
             return (new Remote($screen))->getSymfonyResponse();
         }
-    }
-
-    function readGeocode($address){
-
-        // url encode the address
-        $address = urlencode($address);
-
-        // google map geocode api url
-        $url = "http://maps.google.com/maps/api/geocode/json?sensor=false&address={$address}";
-
-        // get the json response
-        $resp_json = file_get_contents($url);
-
-        // decode the json
-        $resp = json_decode($resp_json, true);
-
-        // response status will be 'OK', if able to geocode given address
-        if($resp['status']=='OK'){
-
-            // get the important data
-            $lati = $resp['results'][0]['geometry']['location']['lat'];
-            $longi = $resp['results'][0]['geometry']['location']['lng'];
-
-            // verify if data is complete
-            if($lati && $longi){
-                return [$lati, $longi];
-            }
-        }
-
-        return false;
     }
 
     private function getRowTitles($key)

@@ -1,6 +1,7 @@
 <?php
 namespace AppShed\Extensions\SpreadsheetBundle\Controller;
 
+use AppShed\Extensions\SpreadsheetBundle\Service\GeoService;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -23,11 +24,18 @@ abstract class SpreadsheetController extends Controller
      */
     protected $logger;
 
-    public function __construct(Spreadsheets $spreadsheets, Registry $doctrine, LoggerInterface $logger)
+    /**
+     * @var GeoService
+     */
+    protected $geoService;
+
+
+    public function __construct(Spreadsheets $spreadsheets, Registry $doctrine, LoggerInterface $logger, GeoService $geoService )
     {
         $this->spreadsheets = $spreadsheets;
         $this->doctrine = $doctrine;
         $this->logger = $logger;
+        $this->geoService = $geoService;
     }
 
     /**
