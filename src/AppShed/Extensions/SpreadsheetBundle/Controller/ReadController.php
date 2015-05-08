@@ -165,7 +165,7 @@ class ReadController extends SpreadsheetController
                                             $lati = $resp['results'][0]['geometry']['location']['lat'];
                                             $longi = $resp['results'][0]['geometry']['location']['lng'];
 
-                                            $marker = new Marker($name, $value, $lati, $longi);
+                                            $marker = new Marker($name, $value, $longi, $lati);
 
                                             $map = new Map($name);
                                             $map->addChild($marker);
