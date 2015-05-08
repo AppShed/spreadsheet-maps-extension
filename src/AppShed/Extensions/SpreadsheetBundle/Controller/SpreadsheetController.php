@@ -1,7 +1,7 @@
 <?php
 namespace AppShed\Extensions\SpreadsheetBundle\Controller;
 
-use AppShed\Extensions\SpreadsheetBundle\Service\GeoService;
+
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
@@ -26,7 +26,7 @@ abstract class SpreadsheetController extends Controller
     protected $logger;
 
     /**
-     * @var GeoService
+     * @var Client
      */
     protected $geoClient;
 
