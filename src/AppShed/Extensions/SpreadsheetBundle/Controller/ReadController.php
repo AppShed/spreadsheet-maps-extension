@@ -143,7 +143,7 @@ class ReadController extends SpreadsheetController
                             $link->setScreenLink($innerScreen);
                         } else {
                             if (!empty($value)) {
-                                $mapCreated = 0;
+                                $map = false;
                                 if ($name == $address ) {
 
                                     $geoResponse = $this->geoClient->get(
@@ -169,16 +169,15 @@ class ReadController extends SpreadsheetController
 
                                             $map = new Map($name);
                                             $map->addChild($marker);
-
-                                            $link = new Link($value);
-                                            $innerScreen->addChild($link);
-                                            $link->setScreenLink($map);
-
-                                            $mapCreated = 1;
                                         }
                                     }
                                 }
-                                if (!$mapCreated) {
+
+                                if ($map) {
+                                    $link = new Link($value);
+                                    $innerScreen->addChild($link);
+                                    $link->setScreenLink($map);
+                                } else {
                                     $innerScreen->addChild(new HTML($value));
                                 }
                             }
