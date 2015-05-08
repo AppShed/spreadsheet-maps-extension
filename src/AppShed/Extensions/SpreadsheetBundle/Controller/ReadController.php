@@ -51,7 +51,7 @@ class ReadController extends SpreadsheetController
 
             $url = $request->get('url', false);
 
-            $address = $request->get('address', null);
+            $address = $request->get('address');
 
             $action = $request->get('action', false);
 
@@ -107,9 +107,6 @@ class ReadController extends SpreadsheetController
             return (new Remote($screen))->getSymfonyResponse();
         }
 
-
-        $geoService = $this->geoService;
-
         $address = $doc->getAddress();
 
         try {
@@ -146,23 +143,42 @@ class ReadController extends SpreadsheetController
                             $link->setScreenLink($innerScreen);
                         } else {
                             if (!empty($value)) {
+                                $mapCreated = 0;
                                 if ($name == $address ) {
 
-                                    $geo = $geoService->getGeo($value);
+                                    $geoResponse = $this->geoClient->get(
+                                        false,
+                                        [
+                                            'query' => [
+                                                'sensor'=>false,
+                                                'address' => $value
+                                            ]
+                                        ]
+                                    );
 
-                                    if ($geo) {
-                                        $marker = new Marker($name, $value, $geo[0], $geo[1]);
+                                    if($geoResponse->getStatusCode()==200){
 
-                                        $map = new Map($name);
-                                        $map->addChild($marker);
+                                        $resp = $geoResponse->json();
 
-                                        $link = new Link($value);
-                                        $innerScreen->addChild($link);
-                                        $link->setScreenLink($map);
-                                    } else {
-                                        $innerScreen->addChild(new HTML($value));
+                                        if ($resp['status']=='OK' && count($resp['results'])) {
+
+                                            $lati = $resp['results'][0]['geometry']['location']['lat'];
+                                            $longi = $resp['results'][0]['geometry']['location']['lng'];
+
+                                            $marker = new Marker($name, $value, $lati, $longi);
+
+                                            $map = new Map($name);
+                                            $map->addChild($marker);
+
+                                            $link = new Link($value);
+                                            $innerScreen->addChild($link);
+                                            $link->setScreenLink($map);
+
+                                            $mapCreated = 1;
+                                        }
                                     }
-                                } else {
+                                }
+                                if (!$mapCreated) {
                                     $innerScreen->addChild(new HTML($value));
                                 }
                             }
