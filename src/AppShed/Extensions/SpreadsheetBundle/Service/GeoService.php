@@ -4,6 +4,7 @@ namespace AppShed\Extensions\SpreadsheetBundle\Service;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+use Psr\Log\LoggerInterface;
 
 /**
  * Description of GeoService
@@ -14,9 +15,12 @@ class GeoService {
 
     private $geoClient;
 
-    public function __construct(Client $geoClient)
+    private $logger;
+
+    public function __construct(Client $geoClient, LoggerInterface $logger )
     {
         $this->geoClient = $geoClient;
+        $this->logger = $logger;
     }
 
     public function getGeo($address)
@@ -45,9 +49,15 @@ class GeoService {
             return $resp['results'][0]['geometry']['location'];
 
         } catch(RequestException $e ) {
-
-            return false;
+            $this->logger->error(
+                'Problem reading a spreadsheet',
+                [
+                    'exception' => $e
+                ]
+            );
         }
+
+        return false;
 
     }
 

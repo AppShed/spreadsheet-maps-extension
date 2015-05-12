@@ -75,6 +75,7 @@
         <service id="geoService"
                  class="AppShed\Extensions\SpreadsheetBundle\Service\GeoService">
             <argument type="service" id="app_shed_extensions_spreadsheet.geo_client"/>
+            <argument type="service" id="logger"/>
         </service>
     </services>
 </container>
