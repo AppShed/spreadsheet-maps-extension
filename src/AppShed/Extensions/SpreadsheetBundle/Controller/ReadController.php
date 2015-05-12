@@ -51,7 +51,7 @@ class ReadController extends SpreadsheetController
 
             $url = $request->get('url', false);
 
-            $address = $request->get('address', null);
+            $address = $request->get('address');
 
             $action = $request->get('action', false);
 
@@ -107,9 +107,6 @@ class ReadController extends SpreadsheetController
             return (new Remote($screen))->getSymfonyResponse();
         }
 
-
-        $geoService = $this->geoService;
-
         $address = $doc->getAddress();
 
         try {
@@ -146,22 +143,23 @@ class ReadController extends SpreadsheetController
                             $link->setScreenLink($innerScreen);
                         } else {
                             if (!empty($value)) {
+                                $map = false;
                                 if ($name == $address ) {
 
-                                    $geo = $geoService->getGeo($value);
+                                    $geo = $this->geoService->getGeo($value);
 
                                     if ($geo) {
-                                        $marker = new Marker($name, $value, $geo[0], $geo[1]);
+                                        $marker = new Marker($name, $value, $geo['lng'], $geo['lat']);
 
                                         $map = new Map($name);
                                         $map->addChild($marker);
-
-                                        $link = new Link($value);
-                                        $innerScreen->addChild($link);
-                                        $link->setScreenLink($map);
-                                    } else {
-                                        $innerScreen->addChild(new HTML($value));
                                     }
+                                }
+
+                                if ($map) {
+                                    $link = new Link($value);
+                                    $innerScreen->addChild($link);
+                                    $link->setScreenLink($map);
                                 } else {
                                     $innerScreen->addChild(new HTML($value));
                                 }

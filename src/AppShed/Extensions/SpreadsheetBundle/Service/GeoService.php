@@ -3,6 +3,8 @@
 namespace AppShed\Extensions\SpreadsheetBundle\Service;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
+use Psr\Log\LoggerInterface;
 
 /**
  * Description of GeoService
@@ -11,33 +13,52 @@ use GuzzleHttp\Client;
  */
 class GeoService {
 
+    private $geoClient;
+
+    private $logger;
+
+    public function __construct(Client $geoClient, LoggerInterface $logger )
+    {
+        $this->geoClient = $geoClient;
+        $this->logger = $logger;
+    }
+
     public function getGeo($address)
     {
-        $guzzle = new Client();
 
-        $address = urlencode($address);
+        try {
+            $geoResponse = $this->geoClient->get(
+                '',
+                [
+                    'query' => [
+                        'address' => $address
+                    ]
+                ]
+            );
 
-        $url = "http://maps.google.com/maps/api/geocode/json?sensor=false&address={$address}";
-
-        $res = $guzzle->get($url);
-
-        if($res->getStatusCode()==200){
-
-            $resp = $res->json();
-
-            if ($resp['status']=='OK') {
-
-                $lati = @$resp['results'][0]['geometry']['location']['lat'];
-                $longi = @$resp['results'][0]['geometry']['location']['lng'];
-
-                if($lati && $longi){
-                    return [$lati, $longi];
-                }
-
+            if ($geoResponse->getStatusCode() != 200) {
+                return false;
             }
+
+            $resp = $geoResponse->json();
+
+            if ($resp['status'] != 'OK' || !count($resp['results'])) {
+                return false;
+            }
+
+            return $resp['results'][0]['geometry']['location'];
+
+        } catch(RequestException $e ) {
+            $this->logger->error(
+                'Problem reading a spreadsheet',
+                [
+                    'exception' => $e
+                ]
+            );
         }
 
         return false;
+
     }
 
 }

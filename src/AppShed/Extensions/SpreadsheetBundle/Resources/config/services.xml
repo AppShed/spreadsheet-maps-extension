@@ -52,8 +52,30 @@
                 <argument>false</argument>
             </call>
         </service>
+        <service id="app_shed_extensions_spreadsheet.geo_client"
+                 class="GuzzleHttp\Client"
+                 factory-method="get"
+                 factory-class="AppShed\Extensions\SpreadsheetBundle\DependencyInjection\GuzzleClientFactory">
+            <argument type="collection">
+                <argument key="base_url">http://maps.google.com/maps/api/geocode/json</argument>
+                <argument key="defaults" type="collection">
+                    <argument key="query" type="collection">
+                        <argument key="sensor">false</argument>
+                    </argument>
+                </argument>
+            </argument>
+            <argument type="collection">
+                <argument type="service" id="app_shed_extensions_spreadsheet.LogSubscriber"/>
+            </argument>
+        </service>
+        <service id="app_shed_extensions_spreadsheet.LogSubscriber"
+                 class="GuzzleHttp\Subscriber\Log\LogSubscriber">
+            <argument type="service" id="logger"/>
+        </service>
         <service id="geoService"
                  class="AppShed\Extensions\SpreadsheetBundle\Service\GeoService">
+            <argument type="service" id="app_shed_extensions_spreadsheet.geo_client"/>
+            <argument type="service" id="logger"/>
         </service>
     </services>
 </container>
