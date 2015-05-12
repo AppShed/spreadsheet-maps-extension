@@ -3,6 +3,7 @@
 namespace AppShed\Extensions\SpreadsheetBundle\Service;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
 
 /**
  * Description of GeoService
@@ -23,7 +24,7 @@ class GeoService {
 
         try {
             $geoResponse = $this->geoClient->get(
-                'geocode/json',
+                '',
                 [
                     'query' => [
                         'address' => $address
@@ -46,7 +47,7 @@ class GeoService {
 
             return false;
 
-        } catch( \Exception $e ) {
+        } catch(RequestException $e ) {
 
             return false;
         }

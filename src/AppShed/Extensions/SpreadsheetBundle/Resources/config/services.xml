@@ -57,12 +57,7 @@
                  factory-method="get"
                  factory-class="AppShed\Extensions\SpreadsheetBundle\DependencyInjection\GuzzleClientFactory">
             <argument type="collection">
-                <argument key="base_url" type="collection">
-                    <argument>http://maps.google.com/maps/api/{action}</argument>
-                    <argument type="collection">
-                        <argument key="action">geocode/json</argument>
-                    </argument>
-                </argument>
+                <argument key="base_url">http://maps.google.com/maps/api/geocode/json</argument>
                 <argument key="defaults" type="collection">
                     <argument key="query" type="collection">
                         <argument key="sensor">false</argument>
