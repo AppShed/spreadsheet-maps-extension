@@ -14,5 +14,5 @@ parameters:
     locale:            en
     secret:            ThisTokenIsNotSoSecretChangeIt
 
-    google_username:    ~
-    google_password:    ~
+    google_username:    user@domain.com
+    google_password:    password

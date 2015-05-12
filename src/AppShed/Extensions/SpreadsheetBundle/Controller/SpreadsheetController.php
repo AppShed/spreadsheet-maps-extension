@@ -1,14 +1,13 @@
 <?php
-namespace AppShed\Extensions\SpreadsheetBundle\Controller;
 
+namespace AppShed\Extensions\SpreadsheetBundle\Controller;
 
 use AppShed\Extensions\SpreadsheetBundle\Service\GeoService;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Psr\Log\LoggerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use ZendGData\Spreadsheets;
 
-abstract class SpreadsheetController extends Controller
+abstract class SpreadsheetController
 {
     /**
      * @var Spreadsheets
@@ -42,7 +41,7 @@ abstract class SpreadsheetController extends Controller
     /**
      * @return \Doctrine\Bundle\DoctrineBundle\Registry
      */
-    public function getDoctrine()
+    protected function getDoctrine()
     {
         return $this->doctrine;
     }
@@ -69,7 +68,7 @@ abstract class SpreadsheetController extends Controller
      * @param $docUrl
      * @return string
      */
-    protected function getKey($docUrl) 
+    protected function getKey($docUrl)
 	{
         preg_match('/([a-zA-Z0-9_-]){44}/',$docUrl,$matches);
         if (isset($matches['0'])) {

@@ -9,11 +9,9 @@ use AppShed\Remote\Element\Item\Text;
 use AppShed\Remote\Element\Screen\Map;
 use AppShed\Remote\Element\Screen\Screen;
 use AppShed\Remote\HTML\Remote;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use AppShed\Extensions\SpreadsheetBundle\Entity\Doc;
 use ZendGData\Spreadsheets\ListQuery;
 
@@ -32,7 +30,7 @@ class ReadController extends SpreadsheetController
         $action = '';
         $secret = $request->get('identifier');
         $em = $this->getDoctrine()->getManager();
-        $doc = $em->getRepository('AppShedExtensionsSpreadsheetBundle:Doc')->findOneBy(array('itemsecret' => $secret));
+        $doc = $em->getRepository('AppShedExtensionsSpreadsheetBundle:Doc')->findOneBy(['itemsecret' => $secret]);
 
         $errors = '';
 
@@ -40,8 +38,8 @@ class ReadController extends SpreadsheetController
             $doc = new Doc();
             $doc->setKey('');
             $doc->setUrl('');
-            $doc->setTitles(array());
-            $doc->setFilters(array());
+            $doc->setTitles([]);
+            $doc->setFilters([]);
             $doc->setItemsecret($secret);
             $doc->setDate(new \DateTime());
         }
@@ -58,7 +56,7 @@ class ReadController extends SpreadsheetController
             $key = $this->getKey($url);
             if ($url && $key) {
 
-                $filters = $request->get('filters', array());
+                $filters = $request->get('filters', []);
 
                 $doc->setAddress($address);
                 $doc->setUrl($url);
@@ -69,7 +67,7 @@ class ReadController extends SpreadsheetController
                 $em->persist($doc);
                 $em->flush();
             } else {
-                if ($url == false) {
+                if (!$url) {
                     $errors = 'Spreadsheet url is empty';
                 } else {
                     $errors = 'Spreadsheet url is not supported or broken';
@@ -77,11 +75,11 @@ class ReadController extends SpreadsheetController
             }
         }
 
-        return array(
+        return [
             'doc' => $doc,
             'action' => $action,
             'error' => $errors
-        );
+        ];
     }
 
     /**
@@ -95,11 +93,12 @@ class ReadController extends SpreadsheetController
         }
 
         $secret = $request->get('identifier');
-        
+
+        /** @var Doc $doc */
         $doc = $this->getDoctrine()
             ->getManager()
             ->getRepository('AppShedExtensionsSpreadsheetBundle:Doc')
-            ->findOneBy(array('itemsecret' => $secret));
+            ->findOneBy(['itemsecret' => $secret]);
 
         if (!$doc) {
             $screen = new Screen('Error');
@@ -113,7 +112,7 @@ class ReadController extends SpreadsheetController
 
             $document = $this->getDocument(
                 $doc->getKey(),
-                $this->getFilterString($doc->getFilters())
+                $this->getFilterString($doc->getFilters(), $request)
             );
 
             //This screen will have a list of the values in A column
@@ -188,7 +187,7 @@ class ReadController extends SpreadsheetController
     private function getRowTitles($key)
     {
         $doc = $this->getDocument($key);
-        $titles = array();
+        $titles = [];
 
         foreach ($doc as $entry) {
             foreach ($entry->getCustom() as $customEntry) {
@@ -211,14 +210,14 @@ class ReadController extends SpreadsheetController
         return $listFeed;
     }
 
-    private function getFilterString($filter)
+    private function getFilterString($filter, Request $request)
     {
-        $filters = array();
+        $filters = [];
 
         foreach ($filter as $option) {
 
             if ($option['filter'] == 'aroundme') {
-                $filters[] = $this->getAroundMeQuery($option['value']);
+                $filters[] = $this->getAroundMeQuery($option['value'], $request);
             } else {
                 if (ctype_digit($option['value'])) {
                     $filters[] = $option['name'] . " " . $option['filter'] . " " . $option['value'] . ' ';
@@ -236,12 +235,12 @@ class ReadController extends SpreadsheetController
         return $str;
     }
 
-    private function getAroundMeQuery($distance)
+    private function getAroundMeQuery($distance, Request $request)
     {
-        $center = array(
-            'lat' => isset($_GET['userlat']) ? $_GET['userlat'] : 0,
-            'lng' => isset($_GET['userlng']) ? $_GET['userlng'] : 0
-        );
+        $center = [
+            'lat' => $request->query->get('userlat', 0),
+            'lng' => $request->query->get('userlng', 0)
+        ];
         $bounds = $this->getBounds($center, $distance);
         $filters[] = 'lat > ' . $bounds['minLat'];
         $filters[] = 'lat < ' . $bounds['maxLat'];
@@ -254,17 +253,15 @@ class ReadController extends SpreadsheetController
     private function getBounds($center, $radius)
     {
         $conv = $this->getConv($center);
-        $bounces = array();
+        $bounces = [];
 
         $top = $this->getPointPosition($conv, $center, $radius, 0);
         $right = $this->getPointPosition($conv, $center, $radius, 90);
         $bottom = $this->getPointPosition($conv, $center, $radius, 180);
         $left = $this->getPointPosition($conv, $center, $radius, 270);
         $bounces['minLng'] = $left['lng'];
-        //$bounces['centerLng']=$center['lng'];
         $bounces['maxLng'] = $right['lng'];
         $bounces['minLat'] = $bottom['lat'];
-        //$bounces['centerLat']=$center['lat'];
         $bounces['maxLat'] = $top['lat'];
         return $bounces;
     }
@@ -292,22 +289,22 @@ class ReadController extends SpreadsheetController
 
     private function getConv($center)
     {
-        return array(
+        return [
             'lat' => $this->distanceOrt(
                     $center,
-                    array('lat' => ($center['lat'] + 0.1), 'lng' => ($center['lng']))
+                    ['lat' => ($center['lat'] + 0.1), 'lng' => ($center['lng'])]
                 ) / 100,
-            'lng' => $this->distanceOrt($center, array('lat' => $center['lat'], 'lng' => ($center['lng'] + 0.1))) / 100
-        );
+            'lng' => $this->distanceOrt($center, ['lat' => $center['lat'], 'lng' => ($center['lng'] + 0.1)]) / 100
+        ];
     }
 
     private function getPointPosition($conv, $center, $r, $angle)
     {
         $r = $r / 1000;
-        return array(
+        return [
             'lat' => $center['lat'] + ($r / $conv['lat'] * cos($angle * M_PI / 180)),
             'lng' => $center['lng'] + ($r / $conv['lng'] * sin($angle * M_PI / 180)),
             'angle' => $angle
-        );
+        ];
     }
 }

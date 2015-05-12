@@ -7,11 +7,9 @@ use AppShed\Remote\Element\Item\HTML;
 use AppShed\Remote\Element\Item\Text;
 use AppShed\Remote\Element\Screen\Screen;
 use AppShed\Remote\HTML\Remote;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use AppShed\Extensions\SpreadsheetBundle\Entity\Doc;
 use ZendGData\Spreadsheets\DocumentQuery;
 
@@ -32,15 +30,15 @@ class WriteController extends SpreadsheetController
         $secret = $request->get('identifier');
 
         $em = $this->getDoctrine()->getManager();
-        $doc = $em->getRepository('AppShedExtensionsSpreadsheetBundle:Doc')->findOneBy(array('itemsecret' => $secret));
+        $doc = $em->getRepository('AppShedExtensionsSpreadsheetBundle:Doc')->findOneBy(['itemsecret' => $secret]);
 
 
         if (is_null($doc)) {
             $doc = new Doc();
             $doc->setKey('');
             $doc->setUrl('');
-            $doc->setTitles(array());
-            $doc->setFilters(array());
+            $doc->setTitles([]);
+            $doc->setFilters([]);
             $doc->setItemsecret($secret);
             $doc->setDate(new \DateTime());
         }
@@ -54,14 +52,14 @@ class WriteController extends SpreadsheetController
 
             try {
                 $worksheet = $this->getDocument($key);
-                
-                
+
+
                 $lines = $worksheet->getContentsAsRows();
                 if (is_array($lines) && isset($lines['0']) && is_array($lines['0'])) {
                     $titles = array_keys($lines['0']);
                 }
                 if(!is_array($titles)){
-                     $titles = array();
+                     $titles = [];
                 }
 
                 $doc->setUrl($url);
@@ -78,18 +76,18 @@ class WriteController extends SpreadsheetController
                     ]
                 );
 
-                return array(
+                return [
                     'doc' => $doc,
                     'action' => $action,
                     'error' => 'Could not access the document'
-                );
+                ];
             }
         }
 
-        return array(
+        return [
             'doc' => $doc,
             'action' => $action
-        );
+        ];
     }
 
     /**
@@ -107,7 +105,8 @@ class WriteController extends SpreadsheetController
         $secret = $request->get('identifier');
 
         $em = $this->getDoctrine()->getManager();
-        $doc = $em->getRepository('AppShedExtensionsSpreadsheetBundle:Doc')->findOneBy(array('itemsecret' => $secret));
+        /** @var Doc $doc */
+        $doc = $em->getRepository('AppShedExtensionsSpreadsheetBundle:Doc')->findOneBy(['itemsecret' => $secret]);
 
         if (!$doc) {
             $screen = new Screen('Error');
@@ -164,7 +163,7 @@ class WriteController extends SpreadsheetController
     private function getColumnTitles($key)
     {
 
-        $titles = array();
+        $titles = [];
 
         $worksheet = $this->getDocument($key);
         if ($worksheet != null) {

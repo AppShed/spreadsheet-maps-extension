@@ -18,7 +18,7 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('app_shed_extensions_spreadsheet')->
+        $treeBuilder->root('app_shed_extensions_spreadsheet')->
             children()->
                 arrayNode("google")->
                     children()->
