@@ -32,20 +32,17 @@ class GeoService {
                 ]
             );
 
-            if($geoResponse->getStatusCode()==200){
-
-                $resp = $geoResponse->json();
-
-                if ($resp['status']=='OK' && count($resp['results'])) {
-
-                    $lat = $resp['results'][0]['geometry']['location']['lat'];
-                    $lon = $resp['results'][0]['geometry']['location']['lng'];
-
-                    return ['lon'=>$lon, 'lat'=>$lat];
-                }
+            if ($geoResponse->getStatusCode() != 200) {
+                return false;
             }
 
-            return false;
+            $resp = $geoResponse->json();
+
+            if ($resp['status'] != 'OK' || !count($resp['results'])) {
+                return false;
+            }
+
+            return $resp['results'][0]['geometry']['location'];
 
         } catch(RequestException $e ) {
 

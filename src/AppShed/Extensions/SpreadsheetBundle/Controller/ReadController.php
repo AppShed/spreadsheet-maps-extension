@@ -149,7 +149,7 @@ class ReadController extends SpreadsheetController
                                     $geo = $this->geoService->getGeo($value);
 
                                     if ($geo) {
-                                        $marker = new Marker($name, $value, $geo['lon'], $geo['lat']);
+                                        $marker = new Marker($name, $value, $geo['lng'], $geo['lat']);
 
                                         $map = new Map($name);
                                         $map->addChild($marker);
