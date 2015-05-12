@@ -2,8 +2,8 @@
 namespace AppShed\Extensions\SpreadsheetBundle\Controller;
 
 
+use AppShed\Extensions\SpreadsheetBundle\Service\GeoService;
 use Doctrine\Bundle\DoctrineBundle\Registry;
-use GuzzleHttp\Client;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use ZendGData\Spreadsheets;
@@ -26,17 +26,17 @@ abstract class SpreadsheetController extends Controller
     protected $logger;
 
     /**
-     * @var Client
+     * @var GeoService
      */
-    protected $geoClient;
+    protected $geoService;
 
 
-    public function __construct(Spreadsheets $spreadsheets, Registry $doctrine, LoggerInterface $logger, Client $geoClient )
+    public function __construct(Spreadsheets $spreadsheets, Registry $doctrine, LoggerInterface $logger, GeoService $geoService )
     {
         $this->spreadsheets = $spreadsheets;
         $this->doctrine = $doctrine;
         $this->logger = $logger;
-        $this->geoClient = $geoClient;
+        $this->geoService = $geoService;
     }
 
     /**

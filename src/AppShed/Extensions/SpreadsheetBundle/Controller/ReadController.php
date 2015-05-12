@@ -146,30 +146,13 @@ class ReadController extends SpreadsheetController
                                 $map = false;
                                 if ($name == $address ) {
 
-                                    $geoResponse = $this->geoClient->get(
-                                        false,
-                                        [
-                                            'query' => [
-                                                'sensor'=>false,
-                                                'address' => $value
-                                            ]
-                                        ]
-                                    );
+                                    $geo = $this->geoService->getGeo($value);
 
-                                    if($geoResponse->getStatusCode()==200){
+                                    if ($geo) {
+                                        $marker = new Marker($name, $value, $geo['lon'], $geo['lat']);
 
-                                        $resp = $geoResponse->json();
-
-                                        if ($resp['status']=='OK' && count($resp['results'])) {
-
-                                            $lati = $resp['results'][0]['geometry']['location']['lat'];
-                                            $longi = $resp['results'][0]['geometry']['location']['lng'];
-
-                                            $marker = new Marker($name, $value, $longi, $lati);
-
-                                            $map = new Map($name);
-                                            $map->addChild($marker);
-                                        }
+                                        $map = new Map($name);
+                                        $map->addChild($marker);
                                     }
                                 }
 
