@@ -1,6 +1,6 @@
 <?php
 
-namespace AppShed\Extensions\SpreadsheetBundle\Service;
+namespace AppShed\Extensions\SpreadsheetMapsBundle\Service;
 
 use Doctrine\Common\Cache\FilesystemCache;
 use GuzzleHttp\Client;
