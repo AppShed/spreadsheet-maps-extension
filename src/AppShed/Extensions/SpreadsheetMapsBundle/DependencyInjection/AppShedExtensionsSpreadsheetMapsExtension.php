@@ -1,6 +1,6 @@
 <?php
 
-namespace AppShed\Extensions\SpreadsheetBundle\DependencyInjection;
+namespace AppShed\Extensions\SpreadsheetMapsBundle\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Config\FileLocator;
@@ -12,7 +12,7 @@ use Symfony\Component\DependencyInjection\Loader;
  *
  * To learn more see {@link http://symfony.com/doc/current/cookbook/bundles/extension.html}
  */
-class AppShedExtensionsSpreadsheetExtension extends Extension
+class AppShedExtensionsSpreadsheetMapsExtension extends Extension
 {
     /**
      * {@inheritDoc}
@@ -25,7 +25,7 @@ class AppShedExtensionsSpreadsheetExtension extends Extension
         $loader = new Loader\XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.xml');
 
-        $container->setParameter('app_shed_extensions_spreadsheet.google_username', $config['google']['username']);
-        $container->setParameter('app_shed_extensions_spreadsheet.google_password', $config['google']['password']);
+        $container->setParameter('app_shed_extensions_spreadsheet_maps.google_username', $config['google']['username']);
+        $container->setParameter('app_shed_extensions_spreadsheet_maps.google_password', $config['google']['password']);
     }
 }

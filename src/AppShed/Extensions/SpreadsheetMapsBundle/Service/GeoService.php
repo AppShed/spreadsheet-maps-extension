@@ -1,9 +1,12 @@
 <?php
 
-namespace AppShed\Extensions\SpreadsheetBundle\Service;
+namespace AppShed\Extensions\SpreadsheetMapsBundle\Service;
 
+use Doctrine\Common\Cache\FilesystemCache;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+use GuzzleHttp\Subscriber\Cache\CacheStorage;
+use GuzzleHttp\Subscriber\Cache\CacheSubscriber;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -25,8 +28,9 @@ class GeoService {
 
     public function getGeo($address)
     {
-
         try {
+            CacheSubscriber::attach($this->geoClient);
+
             $geoResponse = $this->geoClient->get(
                 '',
                 [

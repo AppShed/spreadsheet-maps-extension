@@ -1,5 +1,5 @@
 <?php
-namespace AppShed\Extensions\SpreadsheetBundle\Exceptions;
+namespace AppShed\Extensions\SpreadsheetMapsBundle\Exceptions;
 
 
 class SpreadsheetNotFoundException extends \Exception
