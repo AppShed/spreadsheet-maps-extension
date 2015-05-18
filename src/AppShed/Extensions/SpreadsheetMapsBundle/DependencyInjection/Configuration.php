@@ -1,6 +1,6 @@
 <?php
 
-namespace AppShed\Extensions\SpreadsheetBundle\DependencyInjection;
+namespace AppShed\Extensions\SpreadsheetMapsBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
@@ -18,7 +18,7 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
-        $treeBuilder->root('app_shed_extensions_spreadsheet')->
+        $treeBuilder->root('app_shed_extensions_spreadsheet_maps')->
             children()->
                 arrayNode("google")->
                     children()->

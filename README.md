@@ -1,4 +1,4 @@
-# AppShed Spreadsheet Extension
+# AppShed Spreadsheet Maps Extension
 
 This extension uses google docs
 

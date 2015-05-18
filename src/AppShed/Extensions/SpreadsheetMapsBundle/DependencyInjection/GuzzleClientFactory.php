@@ -2,7 +2,7 @@
 /**
  * Created by Victor on 26/11/14 09:23
  */
-namespace AppShed\Extensions\SpreadsheetBundle\DependencyInjection;
+namespace AppShed\Extensions\SpreadsheetMapsBundle\DependencyInjection;
 
 use GuzzleHttp\Client;
 

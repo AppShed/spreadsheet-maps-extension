@@ -1,6 +1,6 @@
 <?php
 
-namespace AppShed\Extensions\SpreadsheetBundle\Service;
+namespace AppShed\Extensions\SpreadsheetMapsBundle\Service;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;

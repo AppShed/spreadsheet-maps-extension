@@ -1,8 +1,8 @@
 <?php
 
-namespace AppShed\Extensions\SpreadsheetBundle\Controller;
+namespace AppShed\Extensions\SpreadsheetMapsBundle\Controller;
 
-use AppShed\Extensions\SpreadsheetBundle\Service\GeoService;
+use AppShed\Extensions\SpreadsheetMapsBundle\Service\GeoService;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Psr\Log\LoggerInterface;
 use ZendGData\Spreadsheets;
