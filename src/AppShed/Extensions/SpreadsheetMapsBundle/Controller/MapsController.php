@@ -16,14 +16,13 @@ use AppShed\Extensions\SpreadsheetMapsBundle\Entity\Doc;
 use ZendGData\Spreadsheets\ListQuery;
 
 /**
- * @Route("/spreadsheet/maps", service="app_shed_extensions_spreadsheet_maps.controller.maps")
+ * @Route("/", service="app_shed_extensions_spreadsheet_maps.controller.maps")
  */
 class MapsController extends SpreadsheetController
 {
     
     /**
      * @Route("/edit")
-     * @Route("/edit/")
      * @Template()
      */
     public function indexAction(Request $request)
@@ -71,8 +70,7 @@ class MapsController extends SpreadsheetController
         ];
     }
     /**
-     * @Route("/document")
-     * @Route("/document/")
+     * @Route("/view")
      */
     public function documentAction(Request $request)
     {
