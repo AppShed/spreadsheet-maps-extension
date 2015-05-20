@@ -4,18 +4,13 @@
  */
 namespace AppShed\Extensions\SpreadsheetMapsBundle\DependencyInjection;
 
-use GuzzleHttp\Client;
+use Guzzle\Http\Client;
 
 class GuzzleClientFactory
 {
-    public static function get(array $options, array $subscribers)
+    public static function get(array $options)
     {
-
-        $client = new Client($options);
-
-        foreach ($subscribers as $subscriber) {
-            $client->getEmitter()->attach($subscriber);
-        }
+        $client = new Client($options['base_url'],$options['headers'], $options['query']);
 
         return $client;
     }

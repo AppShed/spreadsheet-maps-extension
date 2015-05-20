@@ -2,12 +2,13 @@
 
 namespace AppShed\Extensions\SpreadsheetMapsBundle\Service;
 
-use Doctrine\Common\Cache\FilesystemCache;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Subscriber\Cache\CacheStorage;
-use GuzzleHttp\Subscriber\Cache\CacheSubscriber;
+use Guzzle\Cache\DoctrineCacheAdapter;
+use Guzzle\Http\Client;
+use Guzzle\Http\Exception\RequestException;
+use Guzzle\Plugin\Cache\CachePlugin;
+use Guzzle\Plugin\Cache\DefaultCacheStorage;
 use Psr\Log\LoggerInterface;
+use Doctrine\Common\Cache\ApcCache;
 
 /**
  * Description of GeoService
@@ -28,23 +29,35 @@ class GeoService {
 
     public function getGeo($address)
     {
+
         try {
-            CacheSubscriber::attach($this->geoClient);
+            $cachePlugin = new CachePlugin(array(
+                'storage' => new DefaultCacheStorage(
+                    new DoctrineCacheAdapter(
+                        new ApcCache(__DIR__.'/../../../../../app/cache')
+                    )
+                )
+            ));
+
+            $this->geoClient->addSubscriber($cachePlugin);
 
             $geoResponse = $this->geoClient->get(
                 '',
+                [],
                 [
-                    'query' => [
+                    'query'=>[
+                        'sensor' => false,
                         'address' => $address
                     ]
                 ]
-            );
+            )->send();
 
             if ($geoResponse->getStatusCode() != 200) {
                 return false;
             }
 
             $resp = $geoResponse->json();
+
 
             if ($resp['status'] != 'OK' || !count($resp['results'])) {
                 return false;
