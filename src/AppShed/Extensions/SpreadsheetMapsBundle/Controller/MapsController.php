@@ -20,7 +20,7 @@ use ZendGData\Spreadsheets\ListQuery;
  */
 class MapsController extends SpreadsheetController
 {
-    
+
     /**
      * @Route("/edit")
      * @Template()
@@ -89,48 +89,53 @@ class MapsController extends SpreadsheetController
             return (new Remote($screen))->getSymfonyResponse();
         }
         $address = $doc->getAddress();
+        if (!$address) {
+            $address = 'Address';
+        }
+
         try {
+
             $document = $this->getDocument(
                 $doc->getKey(),
                 $this->getFilterString($doc->getFilters(), $request)
             );
-            //This screen will have a list of the values in A column
-            $screen = new Screen($document->getTitle());
+
+            //This screen will have a list of the markers in Address column
+            $screen = new Map($document->getTitle());
+
             //For each row of the table
             foreach ($document as $entry) {
                 $index = true;
                 $lines = $entry->getCustom();
+
+
                 //Each of the columns of the row
                 foreach ($lines as $customEntry) {
+
                     $name = $customEntry->getColumnName();
                     $value = $customEntry->getText();
+
                     //If the name of a column ends with a '-' then we dont show it
                     if (((strlen($name) - 1) == strpos($name, '-')) == false) {
                         if ($index == true) {
                             //This screen will have all the values across the row
                             $innerScreen = new Screen($value);
-                            $link = new Link($value);
-                            $screen->addChild($link);
                             $index = false;
-                            $link->setScreenLink($innerScreen);
                         } else {
                             if (!empty($value)) {
-                                $map = false;
-                                if ($name == $address ) {
+                                if ($name == strtolower($address) ) {
                                     $geo = $this->geoService->getGeo($value);
+
                                     if ($geo) {
-                                        $marker = new Marker($name, $value, $geo['lng'], $geo['lat']);
-                                        $map = new Map($name);
-                                        $map->addChild($marker);
+                                        $marker = new Marker($address, $value, $geo['lng'], $geo['lat']);
+
+                                        $marker->setScreenLink($innerScreen);
+
+                                        $screen->addChild($marker);
                                     }
                                 }
-                                if ($map) {
-                                    $link = new Link($value);
-                                    $innerScreen->addChild($link);
-                                    $link->setScreenLink($map);
-                                } else {
-                                    $innerScreen->addChild(new HTML($value));
-                                }
+
+                                $innerScreen->addChild(new HTML($value));
                             }
                         }
                     }
@@ -150,7 +155,7 @@ class MapsController extends SpreadsheetController
             return (new Remote($screen))->getSymfonyResponse();
         }
     }
-    
+
     private function getRowTitles($key)
     {
         $doc = $this->getDocument($key);
@@ -163,7 +168,7 @@ class MapsController extends SpreadsheetController
         }
         return $titles;
     }
-    
+
     private function getDocument($key, $filter = null)
     {
         $query = new ListQuery();
@@ -174,7 +179,7 @@ class MapsController extends SpreadsheetController
         $listFeed = $this->getSpreadsheets()->getListFeed($query);
         return $listFeed;
     }
-    
+
     private function getFilterString($filter, Request $request)
     {
         $filters = [];
@@ -196,7 +201,7 @@ class MapsController extends SpreadsheetController
         $str = implode(' AND ', $filters);
         return $str;
     }
-    
+
     private function getAroundMeQuery($distance, Request $request)
     {
         $center = [
@@ -210,7 +215,7 @@ class MapsController extends SpreadsheetController
         $filters[] = 'lng < ' . $bounds['maxLng'];
         return implode(' AND ', $filters);
     }
-    
+
     private function getBounds($center, $radius)
     {
         $conv = $this->getConv($center);
@@ -225,7 +230,7 @@ class MapsController extends SpreadsheetController
         $bounces['maxLat'] = $top['lat'];
         return $bounces;
     }
-    
+
     private function distanceOrt($position, $point, $limit = false)
     {
         $ra = M_PI / 180;
@@ -245,7 +250,7 @@ class MapsController extends SpreadsheetController
             return $f;
         }
     }
-    
+
     private function getConv($center)
     {
         return [
@@ -256,7 +261,7 @@ class MapsController extends SpreadsheetController
             'lng' => $this->distanceOrt($center, ['lat' => $center['lat'], 'lng' => ($center['lng'] + 0.1)]) / 100
         ];
     }
-    
+
     private function getPointPosition($conv, $center, $r, $angle)
     {
         $r = $r / 1000;
