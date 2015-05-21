@@ -89,7 +89,7 @@ class MapsController extends SpreadsheetController
             return (new Remote($screen))->getSymfonyResponse();
         }
 
-        $address = strtolower($doc->getAddress()?$doc->getAddress():'Address');
+        $address = strtolower($doc->getAddress() ?: 'address');
 
         try {
 
