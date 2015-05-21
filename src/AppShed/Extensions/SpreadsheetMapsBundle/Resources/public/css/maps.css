@@ -50,7 +50,7 @@ body {
 }
 
 #filters {
-    height: 100px;
+    height: 75px;
     overflow: auto;
 }
 
@@ -96,4 +96,9 @@ div.errors {
     font-size: 23px;
     text-align: center;
     padding-top: 140px;
+}
+
+input[type=text] {
+    height: 30px;
+    width: 100%;
 }

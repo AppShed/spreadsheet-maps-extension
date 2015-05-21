@@ -2,18 +2,10 @@
 
 namespace AppShed\Extensions\SpreadsheetMapsBundle\Service;
 
-use Doctrine\Common\Cache\FilesystemCache;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
-use GuzzleHttp\Subscriber\Cache\CacheStorage;
-use GuzzleHttp\Subscriber\Cache\CacheSubscriber;
 use Psr\Log\LoggerInterface;
 
-/**
- * Description of GeoService
- *
- * @author Victor
- */
 class GeoService {
 
     private $geoClient;
@@ -26,10 +18,10 @@ class GeoService {
         $this->logger = $logger;
     }
 
+
     public function getGeo($address)
     {
         try {
-            CacheSubscriber::attach($this->geoClient);
 
             $geoResponse = $this->geoClient->get(
                 '',

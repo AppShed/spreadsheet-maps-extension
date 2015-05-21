@@ -59,16 +59,30 @@
             </argument>
             <argument type="collection">
                 <argument type="service" id="app_shed_extensions_spreadsheet_maps.LogSubscriber"/>
+                <argument type="service" id="app_shed_extensions_spreadsheet_maps.CacheSubscriber"/>
             </argument>
         </service>
         <service id="app_shed_extensions_spreadsheet_maps.LogSubscriber"
                  class="GuzzleHttp\Subscriber\Log\LogSubscriber">
             <argument type="service" id="logger"/>
         </service>
+        <service id="app_shed_extensions_spreadsheet_maps.CacheSubscriber"
+                 class="GuzzleHttp\Subscriber\Cache\CacheSubscriber">
+            <argument type="service" id="app_shed_extensions_spreadsheet_maps.CacheStorage"/>
+            <argument key="canCache">count</argument><!-- Hook count function used as callable php function with argument Request always will return true -->
+        </service>
+        <service id="app_shed_extensions_spreadsheet_maps.CacheStorage"
+                 class="GuzzleHttp\Subscriber\Cache\CacheStorage">
+            <argument type="service" id="app_shed_extensions_spreadsheet_maps.ApcCache"/>
+        </service>
+        <service id="app_shed_extensions_spreadsheet_maps.ApcCache"
+                 class="Doctrine\Common\Cache\ApcCache">
+        </service>
         <service id="geoService"
                  class="AppShed\Extensions\SpreadsheetMapsBundle\Service\GeoService">
             <argument type="service" id="app_shed_extensions_spreadsheet_maps.geo_client"/>
             <argument type="service" id="logger"/>
         </service>
+
     </services>
 </container>
