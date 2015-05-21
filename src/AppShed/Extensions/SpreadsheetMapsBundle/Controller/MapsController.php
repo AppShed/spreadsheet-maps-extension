@@ -88,10 +88,8 @@ class MapsController extends SpreadsheetController
             $screen->addChild(new HTML('You must setup the extension before using it'));
             return (new Remote($screen))->getSymfonyResponse();
         }
-        $address = $doc->getAddress();
-        if (!$address) {
-            $address = 'Address';
-        }
+
+        $address = strtolower($doc->getAddress()?$doc->getAddress():'Address');
 
         try {
 
@@ -123,7 +121,7 @@ class MapsController extends SpreadsheetController
                             $index = false;
                         } else {
                             if (!empty($value)) {
-                                if ($name == strtolower($address) ) {
+                                if ($name == $address ) {
                                     $geo = $this->geoService->getGeo($value);
 
                                     if ($geo) {
