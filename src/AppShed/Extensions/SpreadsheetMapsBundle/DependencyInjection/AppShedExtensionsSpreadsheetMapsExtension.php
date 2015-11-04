@@ -25,7 +25,7 @@ class AppShedExtensionsSpreadsheetMapsExtension extends Extension
         $loader = new Loader\XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.xml');
 
-        $container->setParameter('app_shed_extensions_spreadsheet_maps.google_username', $config['google']['username']);
-        $container->setParameter('app_shed_extensions_spreadsheet_maps.google_password', $config['google']['password']);
+//        $container->setParameter('app_shed_extensions_spreadsheet_maps.google_username', $config['google']['username']);
+//        $container->setParameter('app_shed_extensions_spreadsheet_maps.google_password', $config['google']['password']);
     }
 }

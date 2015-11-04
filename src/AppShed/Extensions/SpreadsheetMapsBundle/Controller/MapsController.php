@@ -2,18 +2,16 @@
 
 namespace AppShed\Extensions\SpreadsheetMapsBundle\Controller;
 
-use AppShed\Remote\Element\Item\HTML;
-use AppShed\Remote\Element\Item\Link;
-use AppShed\Remote\Element\Item\Marker;
-use AppShed\Remote\Element\Item\Text;
-use AppShed\Remote\Element\Screen\Map;
-use AppShed\Remote\Element\Screen\Screen;
-use AppShed\Remote\HTML\Remote;
+use AppShed\Extensions\SpreadsheetMapsBundle\Entity\Doc;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+
+use AppShed\Remote\Element\Item\HTML;
+use AppShed\Remote\Element\Item\Marker;
+use AppShed\Remote\Element\Item\Text;
+use AppShed\Remote\Element\Screen\Screen;
+use AppShed\Remote\HTML\Remote;
 use Symfony\Component\HttpFoundation\Request;
-use AppShed\Extensions\SpreadsheetMapsBundle\Entity\Doc;
-use ZendGData\Spreadsheets\ListQuery;
 
 /**
  * @Route("/", service="app_shed_extensions_spreadsheet_maps.controller.maps")
@@ -29,8 +27,8 @@ class MapsController extends SpreadsheetController
     {
         $action = '';
         $secret = $request->get('identifier');
-        $em = $this->getDoctrine()->getManager();
-        $doc = $em->getRepository('AppShedExtensionsSpreadsheetMapsBundle:Doc')->findOneBy(['itemsecret' => $secret]);
+        $em     = $this->getDoctrine()->getManager();
+        $doc    = $em->getRepository('AppShedExtensionsSpreadsheetMapsBundle:Doc')->findOneBy(['itemsecret' => $secret]);
         $errors = '';
         if (is_null($doc)) {
             $doc = new Doc();
@@ -42,10 +40,10 @@ class MapsController extends SpreadsheetController
             $doc->setDate(new \DateTime());
         }
         if ($request->isMethod('post')) {
-            $url = $request->get('url', false);
+            $url     = $request->get('url', false);
             $address = $request->get('address');
-            $action = $request->get('action', false);
-            $key = $this->getKey($url);
+            $action  = $request->get('action', false);
+            $key     = $this->getKey($url);
             if ($url && $key) {
                 $filters = $request->get('filters', []);
                 $doc->setAddress($address);
@@ -56,19 +54,21 @@ class MapsController extends SpreadsheetController
                 $em->persist($doc);
                 $em->flush();
             } else {
-                if (!$url) {
+                if ( ! $url) {
                     $errors = 'Spreadsheet url is empty';
                 } else {
                     $errors = 'Spreadsheet url is not supported or broken';
                 }
             }
         }
+
         return [
-            'doc' => $doc,
+            'doc'    => $doc,
             'action' => $action,
-            'error' => $errors
+            'error'  => $errors
         ];
     }
+
     /**
      * @Route("/view")
      */
@@ -80,12 +80,13 @@ class MapsController extends SpreadsheetController
         $secret = $request->get('identifier');
         /** @var Doc $doc */
         $doc = $this->getDoctrine()
-            ->getManager()
-            ->getRepository('AppShedExtensionsSpreadsheetMapsBundle:Doc')
-            ->findOneBy(['itemsecret' => $secret]);
-        if (!$doc) {
+                    ->getManager()
+                    ->getRepository('AppShedExtensionsSpreadsheetMapsBundle:Doc')
+                    ->findOneBy(['itemsecret' => $secret]);
+        if ( ! $doc) {
             $screen = new Screen('Error');
             $screen->addChild(new HTML('You must setup the extension before using it'));
+
             return (new Remote($screen))->getSymfonyResponse();
         }
 
@@ -93,35 +94,45 @@ class MapsController extends SpreadsheetController
 
         try {
 
-            $document = $this->getDocument(
-                $doc->getKey(),
-                $this->getFilterString($doc->getFilters(), $request)
-            );
+            $document = $this->getDocument($doc->getKey());
 
-            //This screen will have a list of the markers in Address column
-            $screen = new Map($document->getTitle());
+            //This screen will have a list of the values in A column
+            $screen     = new Screen($document->getTitle());
+            $worksheets = $document->getWorksheets();
+            $worksheet  = $worksheets[0];
 
+            $filters = $this->getFilterString($doc->getFilters(), $request);
+            if ( ! empty($filters)) {
+                $lines = $worksheet->getListFeed(["sq" => $filters])->getEntries();
+            } else {
+                $lines = $worksheet->getListFeed()->getEntries();
+            }
+
+            //var_dump($lines);
             //For each row of the table
-            foreach ($document as $entry) {
+            foreach ($lines as $lineEntry) {
                 $index = true;
-                $lines = $entry->getCustom();
 
+                $lineColumns = $lineEntry->getValues();
 
                 //Each of the columns of the row
-                foreach ($lines as $customEntry) {
 
-                    $name = $customEntry->getColumnName();
-                    $value = $customEntry->getText();
+                //Each of the columns of the row
+                foreach ($lineColumns as $name => $value) {
+
+
+
+//                    var_dump($value);
 
                     //If the name of a column ends with a '-' then we dont show it
                     if (((strlen($name) - 1) == strpos($name, '-')) == false) {
                         if ($index == true) {
                             //This screen will have all the values across the row
                             $innerScreen = new Screen($value);
-                            $index = false;
+                            $index       = false;
                         } else {
-                            if (!empty($value)) {
-                                if ($name == $address ) {
+                            if ( ! empty($value)) {
+                                if ($name == $address) {
                                     $geo = $this->geoService->getGeo($value);
 
                                     if ($geo) {
@@ -139,6 +150,7 @@ class MapsController extends SpreadsheetController
                     }
                 }
             }
+
             return (new Remote($screen))->getSymfonyResponse();
         } catch (\Exception $e) {
             $screen = new Screen('Error');
@@ -150,13 +162,14 @@ class MapsController extends SpreadsheetController
                     'exception' => $e
                 ]
             );
+
             return (new Remote($screen))->getSymfonyResponse();
         }
     }
 
     private function getRowTitles($key)
     {
-        $doc = $this->getDocument($key);
+        $doc    = $this->getDocument($key);
         $titles = [];
         foreach ($doc as $entry) {
             foreach ($entry->getCustom() as $customEntry) {
@@ -164,17 +177,14 @@ class MapsController extends SpreadsheetController
             }
             break;
         }
+
         return $titles;
     }
 
-    private function getDocument($key, $filter = null)
+    private function getDocument($key)
     {
-        $query = new ListQuery();
-        $query->setSpreadsheetKey($key);
-        if ($filter) {
-            $query->setSpreadsheetQuery($filter);
-        }
-        $listFeed = $this->getSpreadsheets()->getListFeed($query);
+        $listFeed = $this->getSpreadsheets()->getSpreadsheetById($key);
+
         return $listFeed;
     }
 
@@ -197,44 +207,47 @@ class MapsController extends SpreadsheetController
             }
         }
         $str = implode(' AND ', $filters);
+
         return $str;
     }
 
     private function getAroundMeQuery($distance, Request $request)
     {
-        $center = [
+        $center    = [
             'lat' => $request->query->get('userlat', 0),
             'lng' => $request->query->get('userlng', 0)
         ];
-        $bounds = $this->getBounds($center, $distance);
+        $bounds    = $this->getBounds($center, $distance);
         $filters[] = 'lat > ' . $bounds['minLat'];
         $filters[] = 'lat < ' . $bounds['maxLat'];
         $filters[] = 'lng > ' . $bounds['minLng'];
         $filters[] = 'lng < ' . $bounds['maxLng'];
+
         return implode(' AND ', $filters);
     }
 
     private function getBounds($center, $radius)
     {
-        $conv = $this->getConv($center);
-        $bounces = [];
-        $top = $this->getPointPosition($conv, $center, $radius, 0);
-        $right = $this->getPointPosition($conv, $center, $radius, 90);
-        $bottom = $this->getPointPosition($conv, $center, $radius, 180);
-        $left = $this->getPointPosition($conv, $center, $radius, 270);
+        $conv              = $this->getConv($center);
+        $bounces           = [];
+        $top               = $this->getPointPosition($conv, $center, $radius, 0);
+        $right             = $this->getPointPosition($conv, $center, $radius, 90);
+        $bottom            = $this->getPointPosition($conv, $center, $radius, 180);
+        $left              = $this->getPointPosition($conv, $center, $radius, 270);
         $bounces['minLng'] = $left['lng'];
         $bounces['maxLng'] = $right['lng'];
         $bounces['minLat'] = $bottom['lat'];
         $bounces['maxLat'] = $top['lat'];
+
         return $bounces;
     }
 
     private function distanceOrt($position, $point, $limit = false)
     {
         $ra = M_PI / 180;
-        $b = $position['lat'] * $ra;
-        $c = $point['lat'] * $ra;
-        $f = (2 * asin(
+        $b  = $position['lat'] * $ra;
+        $c  = $point['lat'] * $ra;
+        $f  = (2 * asin(
                     sqrt(
                         pow(sin(($b - $c) / 2), 2) + cos($b) * cos($c) * pow(
                             sin(($position['lng'] * $ra - $point['lng'] * $ra) / 2),
@@ -263,9 +276,10 @@ class MapsController extends SpreadsheetController
     private function getPointPosition($conv, $center, $r, $angle)
     {
         $r = $r / 1000;
+
         return [
-            'lat' => $center['lat'] + ($r / $conv['lat'] * cos($angle * M_PI / 180)),
-            'lng' => $center['lng'] + ($r / $conv['lng'] * sin($angle * M_PI / 180)),
+            'lat'   => $center['lat'] + ($r / $conv['lat'] * cos($angle * M_PI / 180)),
+            'lng'   => $center['lng'] + ($r / $conv['lng'] * sin($angle * M_PI / 180)),
             'angle' => $angle
         ];
     }

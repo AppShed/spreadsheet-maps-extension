@@ -1,51 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <container xmlns="http://symfony.com/schema/dic/services"
            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-
-    <parameters>
-        <parameter key="app_shed_extensions_spreadsheet_maps.google_username"></parameter>
-        <parameter key="app_shed_extensions_spreadsheet_maps.google_password"></parameter>
-    </parameters>
-
     <services>
         <service id="app_shed_extensions_spreadsheet_maps.controller.maps"
                  class="AppShed\Extensions\SpreadsheetMapsBundle\Controller\MapsController">
-            <argument type="service" id="app_shed_extensions_spreadsheet_maps.spreadsheet_adapter"/>
             <argument type="service" id="doctrine"/>
             <argument type="service" id="logger"/>
             <argument type="service" id="geoService"/>
+            <argument>%google_client_id%</argument>
+            <argument>%google_client_email%</argument>
         </service>
-        <service id="app_shed_extensions_spreadsheet_maps.spreadsheet_adapter"
-                 class="ZendGData\Spreadsheets">
-            <argument type="service" id="app_shed_extensions_spreadsheet_maps.google_client"/>
-        </service>
-        <service id="app_shed_extensions_spreadsheet_maps.google_client"
-                 class="ZendGData\HttpClient"
-                 factory-class="ZendGData\ClientLogin"
-                 factory-method="getHttpClient">
-            <argument>%app_shed_extensions_spreadsheet_maps.google_username%</argument>
-            <argument>%app_shed_extensions_spreadsheet_maps.google_password%</argument>
-            <argument type="constant">ZendGData\Spreadsheets::AUTH_SERVICE_NAME</argument>
-            <argument type="service" id="app_shed_extensions_spreadsheet_maps.http_client" />
-        </service>
-        <service id="app_shed_extensions_spreadsheet_maps.http_client"
-                 class="ZendGData\HttpClient">
-            <call method="setAdapter">
-                <argument type="service" id="app_shed_extensions_spreadsheet_maps.client_adapter" />
-            </call>
-        </service>
-        <service id="app_shed_extensions_spreadsheet_maps.client_adapter"
-                 class="Zend\Http\Client\Adapter\Curl">
-            <call method="setCurlOption">
-                <argument type="constant">CURLOPT_SSL_VERIFYPEER</argument>
-                <argument>false</argument>
-            </call>
-            <call method="setCurlOption">
-                <argument type="constant">CURLOPT_SSL_VERIFYHOST</argument>
-                <argument>false</argument>
-            </call>
-        </service>
-        <service id="app_shed_extensions_spreadsheet_maps.geo_client"
+        <service id="app_shed_extensions_spreadsheet.geo_client"
                  class="GuzzleHttp\Client"
                  factory-method="get"
                  factory-class="AppShed\Extensions\SpreadsheetMapsBundle\DependencyInjection\GuzzleClientFactory">
@@ -58,31 +23,17 @@
                 </argument>
             </argument>
             <argument type="collection">
-                <argument type="service" id="app_shed_extensions_spreadsheet_maps.LogSubscriber"/>
-                <argument type="service" id="app_shed_extensions_spreadsheet_maps.CacheSubscriber"/>
+                <argument type="service" id="app_shed_extensions_spreadsheet.LogSubscriber"/>
             </argument>
         </service>
-        <service id="app_shed_extensions_spreadsheet_maps.LogSubscriber"
+        <service id="app_shed_extensions_spreadsheet.LogSubscriber"
                  class="GuzzleHttp\Subscriber\Log\LogSubscriber">
             <argument type="service" id="logger"/>
         </service>
-        <service id="app_shed_extensions_spreadsheet_maps.CacheSubscriber"
-                 class="GuzzleHttp\Subscriber\Cache\CacheSubscriber">
-            <argument type="service" id="app_shed_extensions_spreadsheet_maps.CacheStorage"/>
-            <argument key="canCache">count</argument><!-- Hook count function used as callable php function with argument Request always will return true -->
-        </service>
-        <service id="app_shed_extensions_spreadsheet_maps.CacheStorage"
-                 class="GuzzleHttp\Subscriber\Cache\CacheStorage">
-            <argument type="service" id="app_shed_extensions_spreadsheet_maps.ApcCache"/>
-        </service>
-        <service id="app_shed_extensions_spreadsheet_maps.ApcCache"
-                 class="Doctrine\Common\Cache\ApcCache">
-        </service>
         <service id="geoService"
                  class="AppShed\Extensions\SpreadsheetMapsBundle\Service\GeoService">
-            <argument type="service" id="app_shed_extensions_spreadsheet_maps.geo_client"/>
+            <argument type="service" id="app_shed_extensions_spreadsheet.geo_client"/>
             <argument type="service" id="logger"/>
         </service>
-
     </services>
 </container>
