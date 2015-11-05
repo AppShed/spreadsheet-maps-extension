@@ -14,4 +14,6 @@ parameters:
     locale:            en
     secret:            ThisTokenIsNotSoSecretChangeIt
     google_client_id:   ~
-    google_client_email:    ~
+    google_client_email: ~
+    google_p12_key_path: ~
+

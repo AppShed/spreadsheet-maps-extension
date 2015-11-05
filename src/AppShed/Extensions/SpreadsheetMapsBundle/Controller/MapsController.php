@@ -121,10 +121,10 @@ class MapsController extends Controller
 
             foreach ($lines as $lineEntry) {
                 $index = true;
+
                 /**
                  * @var ListEntry $lineEntry
                  */
-
                 $lineColumns = $lineEntry->getValues();
 
                 //Each of the columns of the row

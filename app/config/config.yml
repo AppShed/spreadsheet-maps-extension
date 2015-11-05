@@ -44,4 +44,4 @@ doctrine:
         auto_mapping: true
 
 app_shed_extensions_spreadsheet_maps:
-    google_p12_key_path: "Spreadsheet-c9b3bcd23b99.p12"
+    google_p12_key_path: %google_p12_key_path%
