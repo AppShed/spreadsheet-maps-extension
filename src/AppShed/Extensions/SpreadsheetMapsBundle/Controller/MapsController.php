@@ -2,26 +2,31 @@
 
 namespace AppShed\Extensions\SpreadsheetMapsBundle\Controller;
 
+
 use AppShed\Extensions\SpreadsheetMapsBundle\Entity\Doc;
+use AppShed\Remote\Element\Item\HTML;
+use AppShed\Remote\Element\Item\Marker;
+use AppShed\Remote\Element\Screen\Screen;
+use AppShed\Remote\HTML\Remote;
+use Google\Spreadsheet\ListEntry;
+use Google\Spreadsheet\Spreadsheet;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 
-use AppShed\Remote\Element\Item\HTML;
-use AppShed\Remote\Element\Item\Marker;
-use AppShed\Remote\Element\Item\Text;
-use AppShed\Remote\Element\Screen\Screen;
-use AppShed\Remote\HTML\Remote;
-use Symfony\Component\HttpFoundation\Request;
-
 /**
- * @Route("/", service="app_shed_extensions_spreadsheet_maps.controller.maps")
+ * @Route("/")
  */
-class MapsController extends SpreadsheetController
+class MapsController extends Controller
 {
 
     /**
      * @Route("/edit")
      * @Template()
+     * @param Request $request
+     *
+     * @return array
      */
     public function indexAction(Request $request)
     {
@@ -71,6 +76,9 @@ class MapsController extends SpreadsheetController
 
     /**
      * @Route("/view")
+     * @param Request $request
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function documentAction(Request $request)
     {
@@ -107,39 +115,35 @@ class MapsController extends SpreadsheetController
             } else {
                 $lines = $worksheet->getListFeed()->getEntries();
             }
+            $geo = $this->get('app_shed_extensions_spreadsheet.geo');
 
-            //var_dump($lines);
             //For each row of the table
+
             foreach ($lines as $lineEntry) {
                 $index = true;
+                /**
+                 * @var ListEntry $lineEntry
+                 */
 
                 $lineColumns = $lineEntry->getValues();
 
                 //Each of the columns of the row
-
-                //Each of the columns of the row
                 foreach ($lineColumns as $name => $value) {
 
-
-
-//                    var_dump($value);
-
-                    //If the name of a column ends with a '-' then we dont show it
+                    //If the name of a column ends with a '-' then we don't show it
                     if (((strlen($name) - 1) == strpos($name, '-')) == false) {
                         if ($index == true) {
-                            //This screen will have all the values across the row
                             $innerScreen = new Screen($value);
+                            //This screen will have all the values across the row
                             $index       = false;
                         } else {
                             if ( ! empty($value)) {
                                 if ($name == $address) {
-                                    $geo = $this->geoService->getGeo($value);
+                                    $position = $geo->getPosition($value);
 
-                                    if ($geo) {
-                                        $marker = new Marker($address, $value, $geo['lng'], $geo['lat']);
-
+                                    if ($position) {
+                                        $marker = new Marker($address, $value, $position['lng'], $position['lat']);
                                         $marker->setScreenLink($innerScreen);
-
                                         $screen->addChild($marker);
                                     }
                                 }
@@ -156,7 +160,7 @@ class MapsController extends SpreadsheetController
             $screen = new Screen('Error');
             $screen->addChild(new HTML('There was an error reading'));
             $screen->addChild(new Text($e->getMessage()));
-            $this->logger->error(
+            $this->get('logger')->error(
                 'Problem reading a spreadsheet',
                 [
                     'exception' => $e
@@ -181,11 +185,17 @@ class MapsController extends SpreadsheetController
         return $titles;
     }
 
+    /**
+     * @param $key
+     *
+     * @return Spreadsheet
+     */
     private function getDocument($key)
     {
-        $listFeed = $this->getSpreadsheets()->getSpreadsheetById($key);
 
-        return $listFeed;
+        $spreadsheet = $this->get('app_shed_extensions_spreadsheet.spreadsheet')->getSpreadsheetById($key);
+
+        return $spreadsheet;
     }
 
     private function getFilterString($filter, Request $request)
@@ -283,4 +293,23 @@ class MapsController extends SpreadsheetController
             'angle' => $angle
         ];
     }
+
+
+    /**
+     * Finds the key query param from a url
+     *
+     * @param $docUrl
+     *
+     * @return string
+     */
+    protected function getKey($docUrl)
+    {
+        preg_match('/([a-zA-Z0-9_-]){44}/', $docUrl, $matches);
+        if (isset($matches['0'])) {
+            return $matches['0'];
+        }
+
+        return null;
+    }
+
 }

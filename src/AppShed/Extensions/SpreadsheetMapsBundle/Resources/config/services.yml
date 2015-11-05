@@ -1,0 +1,32 @@
+parameters:
+    google_p12_key_path: ~
+
+services:
+
+    app_shed_extensions_spreadsheet.geo_client:
+        class: GuzzleHttp\Client
+
+    app_shed_extensions_spreadsheet.spreadsheet_factory:
+        class: AppShed\Extensions\SpreadsheetMapsBundle\DependencyInjection\SpreadsheetFactory
+
+    app_shed_extensions_spreadsheet.spreadsheet:
+        class:   Spreadsheet
+        factory: ["@app_shed_extensions_spreadsheet.spreadsheet_factory", getInstance]
+        arguments:
+              - "%google_client_id%"
+              - "%google_client_email%"
+              - "%kernel.root_dir%/%google_p12_key_path%"
+
+    app_shed_extensions_spreadsheet.LogSubscriber:
+        class: GuzzleHttp\Subscriber\Log\LogSubscriber
+        arguments:
+             - "@logger"
+
+    app_shed_extensions_spreadsheet.geo:
+        class: AppShed\Extensions\SpreadsheetMapsBundle\Service\GeoService
+        arguments:
+           - "@app_shed_extensions_spreadsheet.geo_client"
+           - "@logger"
+
+
+

@@ -20,12 +20,7 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder();
         $treeBuilder->root('app_shed_extensions_spreadsheet_maps')->
             children()->
-                arrayNode("google")->
-                    children()->
-                        scalarNode("username")->isRequired()->cannotBeEmpty()->end()->
-                        scalarNode("password")->isRequired()->cannotBeEmpty()->end()->
-                    end()->
-                end()->
+                    scalarNode("google_p12_key_path")->isRequired()->cannotBeEmpty()->end()->
             end()->
         end();
 

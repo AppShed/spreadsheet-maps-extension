@@ -42,3 +42,6 @@ doctrine:
     orm:
         auto_generate_proxy_classes: %kernel.debug%
         auto_mapping: true
+
+app_shed_extensions_spreadsheet_maps:
+    google_p12_key_path: "Spreadsheet-c9b3bcd23b99.p12"

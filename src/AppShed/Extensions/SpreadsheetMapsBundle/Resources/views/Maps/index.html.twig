@@ -1,19 +1,19 @@
 <html>
 <head>
-    <link href="{{ asset('/bundles/appshedextensionsspreadsheetmaps/css/bootstrap.min.css') }}" rel="stylesheet" />
-    <link href="{{ asset('/bundles/appshedextensionsspreadsheetmaps/css/maps.css') }}" rel="stylesheet" />
+    <link href="{{ asset('/bundles/appshedextensionsspreadsheetmaps/css/bootstrap.min.css') }}" rel="stylesheet"/>
+    <link href="{{ asset('/bundles/appshedextensionsspreadsheetmaps/css/maps.css') }}" rel="stylesheet"/>
     <script src="{{ asset('/bundles/appshedextensionsspreadsheetmaps/js/mootools.core.more.js') }}" type="text/javascript"></script>
     <script>
         document.addEvent("domready", function () {
             var docTitles = {{doc.titles|json_encode|raw}};
             var docFilters = {{doc.filters|json_encode|raw}};
             var filterTypes = ['<',
-                    '>',
-                    '=',
-                    '!=',
-                    '<=',
-                    '>=',
-                    'aroundme'];
+                '>',
+                '=',
+                '!=',
+                '<=',
+                '>=',
+                'aroundme'];
             var filters = document.id("filters");
             var addFilter = function (filterRule) {
                 var index = Math.floor(Math.random() * 10000000);
@@ -75,26 +75,31 @@
                         }
                     }
                 }).inject(filterline);
-            }
-            init = function () {
+            };
+
+            var init = function () {
                 docFilters.each(function (f) {
                     addFilter(f);
                 });
+            };
+
+            if (document.id('addfilter')) {
+                document.id('addfilter').addEvent('click', function (e) {
+                    e.stop();
+                    if (docTitles[0]) {
+                        addFilter({"name": docTitles[0], "filter": filterTypes[0], 'value': ''});
+                    }
+                });
             }
 
-            document.id('addfilter').addEvent('click', function (e) {
-                e.stop();
-                if (docTitles[0]) {
-                    addFilter({"name": docTitles[0], "filter": filterTypes[0], 'value': ''});
-                }
-            });
 
-
-            document.id('reset').addEvent('click', function (e) {
-                e.stop();
-                filters.set('html', '');
-                init();
-            });
+            if (document.id('reset')) {
+                document.id('reset').addEvent('click', function (e) {
+                    e.stop();
+                    filters.set('html', '');
+                    init();
+                });
+            }
             init();
         });
     </script>
@@ -107,12 +112,16 @@
         <form method="post">
             <div class="errors">{{ error }}</div>
             <div>
-                <label>Spreadsheet URL</label>
-                <textarea name="url" class="gradient onepx-border">{{ doc.url }}</textarea>
+                <label  for="url-textarea"  >Spreadsheet URL</label>
+                <textarea id="url-textarea" name="url" class="gradient onepx-border">{{ doc.url }}</textarea>
+
                 <div>You must set the settings to 'Anyone who has the link can view' on Google Drive</div>
 
                 <br/>
-                <div>Your Google Sheet should have a column with the title "Address" that contains the address used for the map pins. If the address is written in a different column, please enter the respective column title here:</div>
+
+                <div>Your Google Sheet should have a column with the title "Address" that contains the address used for the map pins. If the address is written in a
+                    different column, please enter the respective column title here:
+                </div>
                 <input name="address" type="text" placeholder="Address" value="{{ doc.address }}"/>
 
             </div>
@@ -131,6 +140,7 @@
                         <button class="btn" id="reset">Reset</button>
                     </div>
                 {% endif %}
+
             </div>
         </form>
     {% endif %}
