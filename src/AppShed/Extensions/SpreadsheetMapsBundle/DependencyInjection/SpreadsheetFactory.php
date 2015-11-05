@@ -15,14 +15,8 @@ use Google\Spreadsheet\SpreadsheetService;
 class SpreadsheetFactory
 {
 
-    private static $spreadsheetService;
-
-    public static function getInstance($google_client_id, $googleClientEmail, $keyPath)
+    public static function get($google_client_id, $googleClientEmail, $keyPath)
     {
-
-        if (self::$spreadsheetService) {
-            return self::$spreadsheetService;
-        }
 
         $client = new \Google_Client();
 
@@ -50,9 +44,7 @@ class SpreadsheetFactory
         $serviceRequest = new DefaultServiceRequest($accessToken->access_token);
         ServiceRequestFactory::setInstance($serviceRequest);
 
-        self::$spreadsheetService = new SpreadsheetService();
-
-        return self::$spreadsheetService;
+        return new SpreadsheetService();
 
     }
 

@@ -3,30 +3,54 @@ parameters:
 
 services:
 
-    app_shed_extensions_spreadsheet.geo_client:
+    app_shed_extensions_spreadsheet_maps.geo_client:
         class: GuzzleHttp\Client
+        factory_class: AppShed\Extensions\SpreadsheetMapsBundle\DependencyInjection\GuzzleClientFactory
+        factory_method: get
+        arguments:
+            -
+                base_url:
+                    - "http://maps.google.com/maps/api/geocode/{type}"
+                    -
+                      type: "json"
+            -
+                - "@app_shed_extensions_spreadsheet_maps.log_subscriber"
+                - "@app_shed_extensions_spreadsheet_maps.cache_subscriber"
 
-    app_shed_extensions_spreadsheet.spreadsheet_factory:
-        class: AppShed\Extensions\SpreadsheetMapsBundle\DependencyInjection\SpreadsheetFactory
-
-    app_shed_extensions_spreadsheet.spreadsheet:
-        class:   Spreadsheet
-        factory: ["@app_shed_extensions_spreadsheet.spreadsheet_factory", getInstance]
+    app_shed_extensions_spreadsheet_maps.spreadsheet:
+        class: Spreadsheet
+        factory_class: AppShed\Extensions\SpreadsheetMapsBundle\DependencyInjection\SpreadsheetFactory
+        factory_method: get
         arguments:
               - "%google_client_id%"
               - "%google_client_email%"
               - "%kernel.root_dir%/%google_p12_key_path%"
 
-    app_shed_extensions_spreadsheet.LogSubscriber:
+    app_shed_extensions_spreadsheet_maps.log_subscriber:
         class: GuzzleHttp\Subscriber\Log\LogSubscriber
         arguments:
              - "@logger"
 
-    app_shed_extensions_spreadsheet.geo:
+    app_shed_extensions_spreadsheet_maps.geo:
         class: AppShed\Extensions\SpreadsheetMapsBundle\Service\GeoService
         arguments:
-           - "@app_shed_extensions_spreadsheet.geo_client"
+           - "@app_shed_extensions_spreadsheet_maps.geo_client"
            - "@logger"
+
+
+    app_shed_extensions_spreadsheet_maps.cache_subscriber:
+         class: GuzzleHttp\Subscriber\Cache\CacheSubscriber
+         arguments:
+             - "@app_shed_extensions_spreadsheet_maps.cache_storage"
+             - "count"
+             
+    app_shed_extensions_spreadsheet_maps.cache_storage:
+          class: GuzzleHttp\Subscriber\Cache\CacheStorage
+          arguments:
+             - "@app_shed_extensions_spreadsheet_maps.apc_cache"
+
+    app_shed_extensions_spreadsheet_maps.apc_cache:
+          class: Doctrine\Common\Cache\ApcCache
 
 
 

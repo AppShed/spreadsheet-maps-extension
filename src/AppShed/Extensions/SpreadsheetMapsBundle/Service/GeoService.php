@@ -27,10 +27,9 @@ class GeoService
         try {
 
             $geoResponse = $this->geoClient->get(
-                'http://maps.google.com/maps/api/geocode/json',
+                '',
                 [
                     'query' => [
-                        'sensor'  => false,
                         'address' => $address
                     ]
                 ]

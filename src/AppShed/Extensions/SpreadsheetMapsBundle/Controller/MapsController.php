@@ -14,6 +14,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use AppShed\Remote\Element\Item\Text;
 
 /**
  * @Route("/")
@@ -115,7 +116,7 @@ class MapsController extends Controller
             } else {
                 $lines = $worksheet->getListFeed()->getEntries();
             }
-            $geo = $this->get('app_shed_extensions_spreadsheet.geo');
+            $geo = $this->get('app_shed_extensions_spreadsheet_maps.geo');
 
             //For each row of the table
 
@@ -193,7 +194,7 @@ class MapsController extends Controller
     private function getDocument($key)
     {
 
-        $spreadsheet = $this->get('app_shed_extensions_spreadsheet.spreadsheet')->getSpreadsheetById($key);
+        $spreadsheet = $this->get('app_shed_extensions_spreadsheet_maps.spreadsheet')->getSpreadsheetById($key);
 
         return $spreadsheet;
     }
