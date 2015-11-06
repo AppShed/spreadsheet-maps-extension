@@ -43,7 +43,7 @@ services:
          arguments:
              - "@app_shed_extensions_spreadsheet_maps.cache_storage"
              - "count"
-             
+
     app_shed_extensions_spreadsheet_maps.cache_storage:
           class: GuzzleHttp\Subscriber\Cache\CacheStorage
           arguments:
