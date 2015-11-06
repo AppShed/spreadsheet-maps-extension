@@ -5,6 +5,7 @@
 namespace AppShed\Extensions\SpreadsheetMapsBundle\DependencyInjection;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Event\SubscriberInterface;
 
 class GuzzleClientFactory
 {
@@ -15,6 +16,7 @@ class GuzzleClientFactory
 
         foreach ($subscribers as $subscriber) {
             $client->getEmitter()->attach($subscriber);
+
         }
 
         return $client;

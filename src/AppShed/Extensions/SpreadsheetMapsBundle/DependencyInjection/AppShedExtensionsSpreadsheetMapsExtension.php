@@ -22,10 +22,13 @@ class AppShedExtensionsSpreadsheetMapsExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
-        $loader = new Loader\XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
-        $loader->load('services.xml');
+        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
+        $loader->load('services.yml');
 
-        $container->setParameter('app_shed_extensions_spreadsheet_maps.google_username', $config['google']['username']);
-        $container->setParameter('app_shed_extensions_spreadsheet_maps.google_password', $config['google']['password']);
+        $container->setParameter('google_p12_key_path', $config['google_p12_key_path']);
+
+
+
+
     }
 }

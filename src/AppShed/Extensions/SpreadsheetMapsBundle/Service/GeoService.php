@@ -6,21 +6,24 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
 use Psr\Log\LoggerInterface;
 
-class GeoService {
+class GeoService
+{
 
     private $geoClient;
 
     private $logger;
 
-    public function __construct(Client $geoClient, LoggerInterface $logger )
+    public function __construct(Client $geoClient, LoggerInterface $logger)
     {
         $this->geoClient = $geoClient;
+
         $this->logger = $logger;
     }
 
 
-    public function getGeo($address)
+    public function getPosition($address)
     {
+
         try {
 
             $geoResponse = $this->geoClient->get(
@@ -32,21 +35,24 @@ class GeoService {
                 ]
             );
 
+
+
             if ($geoResponse->getStatusCode() != 200) {
                 return false;
             }
 
             $resp = $geoResponse->json();
 
-            if ($resp['status'] != 'OK' || !count($resp['results'])) {
+            if ($resp['status'] != 'OK' || ! count($resp['results'])) {
                 return false;
             }
 
             return $resp['results'][0]['geometry']['location'];
 
-        } catch(RequestException $e ) {
+        } catch (RequestException $e) {
+
             $this->logger->error(
-                'Problem reading a spreadsheet',
+                'Can\'t geocode address  ' . $address,
                 [
                     'exception' => $e
                 ]
