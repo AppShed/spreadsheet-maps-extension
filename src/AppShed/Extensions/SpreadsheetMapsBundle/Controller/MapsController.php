@@ -6,15 +6,16 @@ namespace AppShed\Extensions\SpreadsheetMapsBundle\Controller;
 use AppShed\Extensions\SpreadsheetMapsBundle\Entity\Doc;
 use AppShed\Remote\Element\Item\HTML;
 use AppShed\Remote\Element\Item\Marker;
+use AppShed\Remote\Element\Item\Text;
+use AppShed\Remote\Element\Screen\Map;
 use AppShed\Remote\Element\Screen\Screen;
 use AppShed\Remote\HTML\Remote;
 use Google\Spreadsheet\ListEntry;
 use Google\Spreadsheet\Spreadsheet;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
-use AppShed\Remote\Element\Item\Text;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @Route("/")
@@ -106,7 +107,7 @@ class MapsController extends Controller
             $document = $this->getDocument($doc->getKey());
 
             //This screen will have a list of the values in A column
-            $screen     = new Screen($document->getTitle());
+            $screen     = new Map($document->getTitle());
             $worksheets = $document->getWorksheets();
             $worksheet  = $worksheets[0];
 
@@ -136,7 +137,7 @@ class MapsController extends Controller
                         if ($index == true) {
                             $innerScreen = new Screen($value);
                             //This screen will have all the values across the row
-                            $index       = false;
+                            $index = false;
                         } else {
                             if ( ! empty($value)) {
                                 if ($name == $address) {
